@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>indexedDB&webworker</title>
+</head>
+<body>
+<script>
+    function catchError () {
+        // 先记录点击↓
+        let clickEvents = []
+        document.addEventListener('click', function (e) {
+            let path = []
+            e.path.forEach((item) => {
+                path.unshift({
+                    nodeName: item.nodeName || 'WINDOW',
+                    className: item.className || null,
+                    id: item.id || null
+                })
+            })
+            clickEvents.unshift({
+                x: e.pageX,
+                y: e.pageY,
+                path: path
+            })
+            clickEvents.splice(30)
+        })
+        window.saveError = async function saveError (json) {
+
+            const worker = new Worker('./2.webworker.js')
+
+            worker.postMessage(JSON.stringify(json));
+
+            worker.onmessage = function (event) {
+
+                if (event.data === 'done!') {
+
+                    worker.terminate();
+
+                    console.log('完成上报');
+
+                }
+
+            };
+
+        }
+
+        // 同步
+        window.onerror = function (msg, fileUrl, lineNo, columnNo, error) { //最后两个参数有些部分浏览器拿不到,依然需要记录
+            var stack = null;
+            if (error && error.stack) stack = error.stack;
+            var log = {
+                msg: msg || null,
+                path: fileUrl || null,
+                lineNo: lineNo || null,
+                columnNo: columnNo || null,
+                error: stack,
+                time: new Date().getTime(),
+                clickEvents: clickEvents,
+                userAgent: navigator.userAgent
+            }
+            saveError(log)
+            // return true // <-- 阻止报错向上传递
+        }
+
+        // 异步
+        window.onunhandledrejection = function (event) {
+            saveError({promiseError: event.reason})
+        }
+
+    }
+    catchError()
+
+    a.a = 10
+</script>
+</body>
+</html>
