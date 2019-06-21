@@ -27,7 +27,7 @@
         })
         window.saveError = async function saveError (json) {
 
-            const worker = new Worker('./2.webworker.js')
+            const worker = new Worker('./2.webworker.js');
 
             worker.postMessage(JSON.stringify(json));
 
