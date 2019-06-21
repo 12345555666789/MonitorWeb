@@ -49,6 +49,23 @@ class MonitorForWeb {
     _init () {
         // 记录点击事件
         this.clickEvents = [];
+        window.addEventListener('error', (error) => {
+            setTimeout(() => {
+                let log = {
+                    msg: error.message || null,
+                    path: error.filename || null,
+                    lineNo: error.lineno || null,
+                    columnNo: error.colno || null,
+                    error: error.error.stack || null,
+                    isTrusted: error.isTrusted,
+                    time: new Date().getTime(),
+                    clickEvents: this.clickEvents,
+                    userAgent: navigator.userAgent
+                };
+                this.saveError(log);
+            }, 500)
+            // return true // <-- 阻止报错向上传递
+        });
         document.addEventListener('click',(e) => {
             let path = [];
             e.path.forEach((item) => {
@@ -61,26 +78,11 @@ class MonitorForWeb {
             this.clickEvents.unshift({
                 x: e.pageX,
                 y: e.pageY,
+                width: window.innerWidth,
+                height: window.innerHeight,
                 path: path
             });
             this.clickEvents.splice(30)
-        });
-        window.addEventListener('error', (msg, fileUrl, lineNo, columnNo, error) => {
-            let stack = null;
-            if (error && error.stack) stack = error.stack;
-            console.log(msg.toJSON());
-            let log = {
-                msg: msg || null,
-                path: fileUrl || null,
-                lineNo: lineNo || null,
-                columnNo: columnNo || null,
-                error: stack,
-                time: new Date().getTime(),
-                clickEvents: this.clickEvents,
-                userAgent: navigator.userAgent
-            };
-            this.saveError(log);
-            // return true // <-- 阻止报错向上传递
         });
         window.addEventListener('unhandledrejection', (event) => {
             this.saveError({promiseError: event.reason})
@@ -100,6 +102,8 @@ class MonitorForWeb {
 
                 console.log('完成上报');
 
+            } else {
+                console.log('上报失败, 已保存至本地数据库, 等待下次上传');
             }
 
         };
