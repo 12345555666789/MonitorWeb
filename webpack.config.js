@@ -1,6 +1,6 @@
 let path = require('path');
 module.exports = {
-    entry: './src/webMonitor.js',//入口文件
+    entry: './src/webLog.js',//入口文件
     output: {//出口配置
         path: path.resolve('dist'),//出口文件路径
         filename: "[name].[chunkhash:8].js"//出口文件名称

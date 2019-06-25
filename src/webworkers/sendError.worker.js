@@ -1,58 +1,69 @@
 import axios from 'axios'
-let HelloIndexedDB = require('hello-indexeddb');
-globalThis.HelloIndexedDB = HelloIndexedDB;
+let IndexedDB = require('hello-indexeddb');
+globalThis.HelloIndexedDB = IndexedDB;
+const { HelloIndexedDB } = globalThis.HelloIndexedDB;
+let idb = new HelloIndexedDB();
+let config = {};
 sendErrorWorker();
+
 // 定义错误类型
-function analysisError (errorStr) {
-    const errorTypes = [
-        'SyntaxError', // 语法错误
-        'ReferenceError', // 引用错误
-        'RangeError', // 范围错误
-        'TypeError', // 类型错误
-        'URLError', // URL错误
-        'EvalError', // Eval错误
-        'promiseError' // 异步错误
-    ]
-    let errorJSON = {...JSON.parse(errorStr)};
-    errorTypes.map((item) => {
-        if (errorStr.includes(item)) {
-            errorJSON.errType = item
-        }
-    })
-    return errorJSON
+const errorTypes = [
+    'SyntaxError', // 语法错误
+    'ReferenceError', // 引用错误
+    'RangeError', // 范围错误
+    'TypeError', // 类型错误
+    'URLError', // URL错误
+    'EvalError', // Eval错误
+    'promiseError' // 异步错误
+];
+function analysisError (data) {
+    let errors = [...data];
+    errors.forEach(item => {
+        errorTypes.map((item1) => {
+            if (item.messages.includes(item1)) {
+                item.errType = item1
+            }
+        });
+    });
+    return errors
 }
 
 // 保存并上报错误日志
 function sendErrorWorker () {
-    const { HelloIndexedDB } = globalThis.HelloIndexedDB;
-    let idb = new HelloIndexedDB();
     onmessage = async (event) => {
-        let newErrorJSON = analysisError(event.data);
+        let data = JSON.parse(event.data);
+        let queue = data.queue;
+        let newErrorJSON = {
+            data: analysisError(queue),
+            config: data.config
+        };
+        config = newErrorJSON.config;
         let oldErrorJSON = {};
-        let retryCount = 0;
         try {
-            oldErrorJSON = await idb.getItem(newErrorJSON.errType);
-        } catch (e) {}
-        if (oldErrorJSON && oldErrorJSON.length) {
-            oldErrorJSON.push(newErrorJSON)
+            oldErrorJSON = await idb.getItem('MonitorForWeb') || {};
+        } catch (e) {
+            console.log(e);
+        }
+        if (oldErrorJSON.data && oldErrorJSON.data.length) {
+            oldErrorJSON.data.push(...newErrorJSON.data)
         } else {
-            oldErrorJSON = [newErrorJSON]
+            oldErrorJSON = newErrorJSON
         }
         try {
-            await idb.setItem(newErrorJSON.errType, oldErrorJSON);
-        } catch (e) {}
-        let sendError = () => {
-            axios.post(newErrorJSON.config.url, newErrorJSON).then((res) => {
-                postMessage('done!')
-            }).catch(() => {
-                if (retryCount <= newErrorJSON.config.retryCount) {
-                    retryCount ++;
-                    sendError();
-                } else {
-                    postMessage('Failed')
-                }
-            });
+            await idb.setItem('MonitorForWeb', oldErrorJSON);
+        } catch (e) {
+            console.log(e);
         }
-        sendError();
+        sendError(config, oldErrorJSON.data);
     }
 }
+
+let sendError = (config, errorJSON) => {
+    axios.post(config.url, errorJSON).then(async (res) => {
+        console.log(errorJSON.length + '条日志上报成功');
+        await idb.delete('MonitorForWeb');
+        postMessage('DONE');
+    }).catch(() => {
+        postMessage('RETRY');
+    });
+};
