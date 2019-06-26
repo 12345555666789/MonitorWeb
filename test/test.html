@@ -11,13 +11,7 @@
 <div style="font-size: 25px">异步错误:<h3 id="asyncCatch"></h3></div>
 <button id="errBtn">报错</button>
 <script>
-    new MonitorForWeb({
-        url: 'http://127.0.0.1:8888',
-        maxRetryCount: 5,
-        reportingCycle: 5000,
-        moduleName: location.pathname.split('/')[1] || null,
-        isLog: true
-    });
+    new MonitorForWeb('http://127.0.0.1:8888');
 
     function errRun () {
         errRun()
