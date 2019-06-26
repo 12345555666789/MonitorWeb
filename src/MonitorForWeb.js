@@ -27,7 +27,7 @@ class MonitorForWeb {
             config = {
                 url: param,
                 maxRetryCount: 5,
-                reportingCycle: 100000,
+                reportingCycle: 10000,
                 maxQueueCount: 100,
                 moduleName: location.pathname.split('/')[1] || null,
                 isLog: true
@@ -40,7 +40,7 @@ class MonitorForWeb {
                 config.maxRetryCount = 5
             }
             if (typeof param.reportingCycle !== 'number') {
-                config.reportingCycle = 100000
+                config.reportingCycle = 10000
             }
             if (typeof param.maxQueueCount !== 'number') {
                 config.maxQueueCount = 100
@@ -156,24 +156,22 @@ class MonitorForWeb {
     exceptionHandler () {
         // 页面onerror捕获异常
         window.addEventListener('error', (error) => {
-            setTimeout(() => {
-                let log = {
-                    type: '[onError]',
-                    messages: error.message || null,
-                    path: error.filename || null,
-                    lineNo: error.lineno || null,
-                    columnNo: error.colno || null,
-                    error: error.error.stack || null,
-                    isTrusted: error.isTrusted || null,
-                    time: new Date().getTime(),
-                    timeLocalString: MonitorForWeb._getDateTimeString(new Date()),
-                    clickEvents: this.clickEvents || null,
-                    userAgent: navigator.userAgent || null,
-                    moduleName: this.config.moduleName,
-                    id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
-                };
-                this.queue.push(log);
-            }, 500)
+            let log = {
+                type: '[onError]',
+                messages: error.message || null,
+                path: error.filename || null,
+                lineNo: error.lineno || null,
+                columnNo: error.colno || null,
+                error: error.error.stack || null,
+                isTrusted: error.isTrusted || null,
+                time: new Date().getTime(),
+                timeLocalString: MonitorForWeb._getDateTimeString(new Date()),
+                clickEvents: this.clickEvents || null,
+                userAgent: navigator.userAgent || null,
+                moduleName: this.config.moduleName,
+                id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
+            };
+            this.queue.push(log);
             // return true // <-- 阻止报错向上传递
         });
 
@@ -301,7 +299,7 @@ class MonitorForWeb {
         // 每次最多上报数条
         let data = {
             config: this.config,
-            queue: this.queue.splice(0, this.config.maxQueueCount)
+            queue: this.queue.slice(0, this.config.maxQueueCount)
         };
 
         worker.postMessage(JSON.stringify(data));
