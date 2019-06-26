@@ -8,7 +8,7 @@
     "hello-indexeddb": "^2.6.2"
   },
   "description": "web前端监控及日志上报方案",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "webpack.config.js",
   "directories": {
     "doc": "doc",
