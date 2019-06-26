@@ -21,7 +21,7 @@ class MonitorWeb {
     constructor(param) {
         let config = param;
         if (typeof config === 'undefined') {
-            throw new Error('MonitorForWeb初始化错误 - 构造函数的参数不能为空！');
+            throw new Error('MonitorWeb初始化错误 - 构造函数的参数不能为空！');
         }
         if (typeof config === 'string') {
             config = {
@@ -34,7 +34,7 @@ class MonitorWeb {
             };
         } else if (typeof config === 'object') {
             if (typeof param.url !== 'string') {
-                throw new Error('MonitorForWeb初始化错误 - 构造函数的参数 url 必须是一个字符串！');
+                throw new Error('MonitorWeb初始化错误 - 构造函数的参数 url 必须是一个字符串！');
             }
             if (typeof param.maxRetryCount !== 'number') {
                 config.maxRetryCount = 5
@@ -52,7 +52,7 @@ class MonitorWeb {
                 config.isLog = true
             }
         } else {
-            throw new Error('MonitorForWeb初始化错误 - 构造函数的参数格式不正确！');
+            throw new Error('MonitorWeb初始化错误 - 构造函数的参数格式不正确！');
         }
 
         // 日志上报地址
@@ -206,8 +206,8 @@ class MonitorWeb {
 
             // 重写 open 方法
             XMLHttpRequest.prototype.open = function (...args) {
-                this._MonitorForWebMethod = args[0];
-                this._MonitorForWebUrl = MonitorWeb.resolveUrl(args[1]);
+                this._MonitorWebMethod = args[0];
+                this._MonitorWebUrl = MonitorWeb.resolveUrl(args[1]);
                 that.xhrOpen.apply(this, args);
             };
 
@@ -219,7 +219,7 @@ class MonitorWeb {
                 // 添加 readystatechange 事件
                 this.addEventListener('readystatechange', function () {
                     // 排除掉用户自定义不需要记录日志的 ajax
-                    if (that.logAjaxFilter(this._MonitorForWebUrl, this._MonitorForWebMethod)) {
+                    if (that.logAjaxFilter(this._MonitorWebUrl, this._MonitorWebMethod)) {
                         try {
                             if (this.readyState === XMLHttpRequest.DONE) {
                                 // 请求结束时间
@@ -234,8 +234,8 @@ class MonitorWeb {
                                 } else {
                                     messages.push('接口请求失败！');
                                 }
-                                messages.push(`请求耗时：${costTime}s URL：${this._MonitorForWebUrl} 请求方式：${this._MonitorForWebMethod}`);
-                                if (this._MonitorForWebMethod.toLowerCase() === 'post') {
+                                messages.push(`请求耗时：${costTime}s URL：${this._MonitorWebUrl} 请求方式：${this._MonitorWebMethod}`);
+                                if (this._MonitorWebMethod.toLowerCase() === 'post') {
                                     messages.push('表单数据：', data);
                                 }
                                 messages.push(`状态码：${this.status}`);
@@ -253,8 +253,8 @@ class MonitorWeb {
                         } catch (err) {
                             const messages = [];
                             messages.push('接口请求出错！');
-                            messages.push(`URL：${this._MonitorForWebUrl} 请求方式：${this._MonitorForWebMethod}`);
-                            if (this._MonitorForWebMethod.toLowerCase() === 'post') {
+                            messages.push(`URL：${this._MonitorWebUrl} 请求方式：${this._MonitorWebMethod}`);
+                            if (this._MonitorWebMethod.toLowerCase() === 'post') {
                                 messages.push('表单数据：', data);
                             }
                             messages.push(`状态码：${this.status}`);

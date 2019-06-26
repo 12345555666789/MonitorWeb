@@ -6,5 +6,5 @@
  */
 
 import MonitorWeb from './monitor-web'
-window.MonitorForWeb = MonitorWeb ;
+window.MonitorWeb = MonitorWeb ;
 export default MonitorWeb;
