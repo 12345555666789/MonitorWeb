@@ -17,7 +17,7 @@ if (!('toJSON' in ErrorEvent.prototype)) {
     });
 }
 
-class MonitorForWeb {
+class MonitorWeb {
     constructor(param) {
         let config = param;
         if (typeof config === 'undefined') {
@@ -67,7 +67,7 @@ class MonitorForWeb {
         // 是否要格式化 console 打印的内容
         this.stylize = config.stylize == null ? true : config.stylize;
 
-        this.stylize = this.stylize && MonitorForWeb._stylizeSupport();
+        this.stylize = this.stylize && MonitorWeb._stylizeSupport();
 
         // 异常日志队列
         this.queue = [];
@@ -124,11 +124,11 @@ class MonitorForWeb {
 
     // 清除历史log
     async clearHistory () {
-        let history = await idb.getItem('MonitorForWeb');
+        let history = await idb.getItem('MonitorWeb');
         if (history && history.data.length) {
             this.queue.push(...history.data);
         }
-        await idb.delete('MonitorForWeb')
+        await idb.delete('MonitorWeb')
     }
     // 记录点击事件
     exceptionClick () {
@@ -164,7 +164,7 @@ class MonitorForWeb {
                 error: error.error.stack || null,
                 isTrusted: error.isTrusted || null,
                 time: new Date().getTime(),
-                timeLocalString: MonitorForWeb._getDateTimeString(new Date()),
+                timeLocalString: MonitorWeb._getDateTimeString(new Date()),
                 clickEvents: this.clickEvents || null,
                 userAgent: navigator.userAgent || null,
                 moduleName: this.config.moduleName,
@@ -183,7 +183,7 @@ class MonitorForWeb {
                 errorType: 'PromiseError',
                 userAgent: navigator.userAgent || null,
                 time: new Date().getTime(),
-                timeLocalString: MonitorForWeb._getDateTimeString(new Date()),
+                timeLocalString: MonitorWeb._getDateTimeString(new Date()),
                 clickEvents: this.clickEvents || null,
                 moduleName: this.config.moduleName,
                 id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
@@ -207,7 +207,7 @@ class MonitorForWeb {
             // 重写 open 方法
             XMLHttpRequest.prototype.open = function (...args) {
                 this._MonitorForWebMethod = args[0];
-                this._MonitorForWebUrl = MonitorForWeb.resolveUrl(args[1]);
+                this._MonitorForWebUrl = MonitorWeb.resolveUrl(args[1]);
                 that.xhrOpen.apply(this, args);
             };
 
@@ -274,7 +274,7 @@ class MonitorForWeb {
         args.unshift(`{${this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)}}`);
         this.queue.push({
             type: '[ajax]',
-            time: MonitorForWeb._getDateTimeString(time),
+            time: MonitorWeb._getDateTimeString(time),
             moduleName: this.config.moduleName,
             level,
             messages: args,
@@ -306,18 +306,18 @@ class MonitorForWeb {
         worker.onmessage = async (event) => {
 
             // 上报成功, 清除队列
-            if (event.data === MonitorForWeb.workerEnmu.done) {
+            if (event.data === MonitorWeb.workerEnmu.done) {
                 this.queue = [];
                 this.retryCount = 1
             }
 
-            if (event.data === MonitorForWeb.workerEnmu.retry) {
+            if (event.data === MonitorWeb.workerEnmu.retry) {
                 if (this.retryCount >= this.config.maxRetryCount) {
                     clearInterval(this.timer);
                     if (this.config.isLog) console.log(`发送日志请求的连续失败次数过多，已停止发送日志。请检查日志接口 ${this.url} 是否正常！`);
                 } else {
                     if (this.config.isLog) console.log('配置地址[' + this.config.url + ']上报失败, 等待下次重试 ' + this.retryCount + '...');
-                    await idb.delete('MonitorForWeb');
+                    await idb.delete('MonitorWeb');
                     this.retryCount ++;
                 }
             }
@@ -412,14 +412,14 @@ class MonitorForWeb {
             day = `0${day}`;
         }
 
-        return `${year}-${month}-${day} ${MonitorForWeb._getTimeString(now)}`;
+        return `${year}-${month}-${day} ${MonitorWeb._getTimeString(now)}`;
     }
 
     // 调用系统 console 打印日志
     _printConsole(time, level, ...args) {
         if (console && this.config.isLog) {
             if (this.stylize) {
-                console[level](`%c[${MonitorForWeb._getTimeString(time)}] [${level.toUpperCase()}] -`, `color: ${MonitorForWeb.colorEnum[level]}`, ...args);
+                console[level](`%c[${MonitorWeb._getTimeString(time)}] [${level.toUpperCase()}] -`, `color: ${MonitorWeb.colorEnum[level]}`, ...args);
             } else {
                 console[level](...args);
             }
@@ -435,7 +435,7 @@ class MonitorForWeb {
 
     // 记录一条信息日志
     info(...args) {
-        this._log(null, MonitorForWeb.levelEnum.info, ...args);
+        this._log(null, MonitorWeb.levelEnum.info, ...args);
     }
 
     // 记录一条普通日志
@@ -445,17 +445,17 @@ class MonitorForWeb {
 
     // 记录一条警告日志
     warn(...args) {
-        this._log(null, MonitorForWeb.levelEnum.warn, ...args);
+        this._log(null, MonitorWeb.levelEnum.warn, ...args);
     }
 
     // 记录一条错误日志
     error(...args) {
-        this._log(null, MonitorForWeb.levelEnum.error, ...args);
+        this._log(null, MonitorWeb.levelEnum.error, ...args);
     }
     /* eslint-enable no-console, no-bitwise*/
 }
 // 日志级别枚举
-MonitorForWeb.levelEnum = {
+MonitorWeb.levelEnum = {
     /**
      * 信息
      */
@@ -473,7 +473,7 @@ MonitorForWeb.levelEnum = {
 };
 
 // 日志颜色枚举
-MonitorForWeb.colorEnum = {
+MonitorWeb.colorEnum = {
     /**
      * 信息日志颜色，默认宝蓝色
      */
@@ -506,7 +506,7 @@ MonitorForWeb.colorEnum = {
 };
 
 // webWorker 返回状态枚举
-MonitorForWeb.workerEnmu = {
+MonitorWeb.workerEnmu = {
     /**
      * 成功
      */
@@ -522,4 +522,4 @@ MonitorForWeb.workerEnmu = {
      */
     failed: 'FAILED'
 };
-export default MonitorForWeb
+export default MonitorWeb

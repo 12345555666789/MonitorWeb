@@ -31,7 +31,7 @@ function analysisError (data) {
 // 保存并上报错误日志
 function sendErrorWorker () {
     onmessage = async (event) => {
-        await idb.delete('MonitorForWeb');
+        await idb.delete('MonitorWeb');
         let data = JSON.parse(event.data);
         let queue = data.queue;
         let newErrorJSON = {
@@ -41,7 +41,7 @@ function sendErrorWorker () {
         config = newErrorJSON.config;
         let oldErrorJSON = {};
         try {
-            oldErrorJSON = await idb.getItem('MonitorForWeb') || {};
+            oldErrorJSON = await idb.getItem('MonitorWeb') || {};
         } catch (e) {
             if (config.isLog) console.log(e);
         }
@@ -51,7 +51,7 @@ function sendErrorWorker () {
             oldErrorJSON = newErrorJSON
         }
         try {
-            await idb.setItem('MonitorForWeb', oldErrorJSON);
+            await idb.setItem('MonitorWeb', oldErrorJSON);
         } catch (e) {
             if (config.isLog) console.log(e);
         }
@@ -62,7 +62,7 @@ function sendErrorWorker () {
 let sendError = (config, errorJSON) => {
     axios.post(config.url, errorJSON).then(async (res) => {
         if (config.isLog) console.log(errorJSON.length + '条日志上报成功');
-        await idb.delete('MonitorForWeb');
+        await idb.delete('MonitorWeb');
         postMessage('DONE');
     }).catch(() => {
         postMessage('RETRY');
