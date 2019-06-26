@@ -148,7 +148,6 @@ class MonitorForWeb {
                 height: window.innerHeight,
                 path: path
             });
-            this.clickEvents.splice(0, 30)
         });
     }
 
@@ -156,24 +155,22 @@ class MonitorForWeb {
     exceptionHandler () {
         // 页面onerror捕获异常
         window.addEventListener('error', (error) => {
-            setTimeout(() => {
-                let log = {
-                    type: '[onError]',
-                    messages: error.message || null,
-                    path: error.filename || null,
-                    lineNo: error.lineno || null,
-                    columnNo: error.colno || null,
-                    error: error.error.stack || null,
-                    isTrusted: error.isTrusted || null,
-                    time: new Date().getTime(),
-                    timeLocalString: MonitorForWeb._getDateTimeString(new Date()),
-                    clickEvents: this.clickEvents || null,
-                    userAgent: navigator.userAgent || null,
-                    moduleName: this.config.moduleName,
-                    id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
-                };
-                this.queue.push(log);
-            }, 500)
+            let log = {
+                type: '[onError]',
+                messages: error.message || null,
+                path: error.filename || null,
+                lineNo: error.lineno || null,
+                columnNo: error.colno || null,
+                error: error.error.stack || null,
+                isTrusted: error.isTrusted || null,
+                time: new Date().getTime(),
+                timeLocalString: MonitorForWeb._getDateTimeString(new Date()),
+                clickEvents: this.clickEvents || null,
+                userAgent: navigator.userAgent || null,
+                moduleName: this.config.moduleName,
+                id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
+            };
+            this.queue.push(log);
             // return true // <-- 阻止报错向上传递
         });
 
