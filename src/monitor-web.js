@@ -122,6 +122,21 @@ export class MonitorWeb {
         }, this.config.reportingCycle)
     }
 
+    // 将框架捕获的报错添加至队列
+    catchError (error) {
+        let log = {
+            type: '[onError]',
+            ...error,
+            time: new Date().getTime(),
+            timeLocalString: MonitorWeb._getDateTimeString(new Date()),
+            clickEvents: this.clickEvents || null,
+            userAgent: navigator.userAgent || null,
+            moduleName: this.config.moduleName,
+            id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
+        };
+        this.queue.push(log);
+    }
+
     // 清除历史log
     async clearHistory () {
         let history = await idb.getItem('MonitorWeb');
