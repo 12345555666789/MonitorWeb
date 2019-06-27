@@ -126,7 +126,14 @@ export class MonitorWeb {
     catchError (error) {
         let log = {
             type: '[onError]',
-            ...error,
+            messages: error.message || null,
+            errorType: error.name,
+            path: location.href || null,
+            lineNo: error.line || null,
+            columnNo: error.column || null,
+            error: error.stack || null,
+            script: error.script || null,
+            isTrusted: error.isTrusted || null,
             time: new Date().getTime(),
             timeLocalString: MonitorWeb._getDateTimeString(new Date()),
             clickEvents: this.clickEvents || null,
