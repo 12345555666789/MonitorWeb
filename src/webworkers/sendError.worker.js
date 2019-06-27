@@ -19,7 +19,9 @@ const errorTypes = [
 function analysisError (data) {
     let errors = [...data];
     errors.forEach(item => {
-        item.errType = errorTypes.find(errorType => item.messages.indexOf(errorType) !== -1)
+        if (item.type === '[onError]' && !item.errorType) {
+            item.errorType = errorTypes.find(errorType => item.messages.indexOf(errorType) !== -1)
+        }
     });
     return errors
 }
