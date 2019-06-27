@@ -1,3 +1,64 @@
 ## monitor-web
 web前端日志及上报方案
 
+理论上适用大部分前端项目、PC、移动端、框架、原生。
+
+使用了webworker 分别处理日志分类以及上报请求
+
+未上报成功的存至本地indexDB, 方便下次进入页面再次上报
+
+只采集报错异常的相关信息
+
+> npm install monitor-web -S 现在还不行,可以先用dist里面的
+
+> require('monitor-web')
+
+> new MonitorWeb({url:'http://127.0.0.1:8888'})
+
+#### js api配置项
+
+| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------:|
+| config | Object | true    |配置对象,创建实例时传入, 默认值: 无 |
+|::url   | String |  true   | 上报接口url|
+|::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
+|::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:100000|
+|::moduleName | Number  |  false | 页面模块名称, 如不传则取页面url路径部分第一级 |
+|::isLog | String | false | 是否在控制台打印上报情况|
+
+#### 代码逻辑异常日志字段
+| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------:|
+| type   | String | true | 错误类型, 代码错误或ajax错误 |
+| clickEvents | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
+|::height | Number | false | 浏览器高度px |
+|::width | Number | false | 浏览器宽度px |
+|::x | Number | false | 鼠标位置x坐标 |
+|::y | Number | false | 鼠标位置y坐标 |
+|::path | Array(Object) | false | 点击事件源路径从window到事件源 |
+|::::nodeName | String | false | 标签名称 |
+|::::className | String | false | 标签类名 |
+|::::id | String | false | 标签ID |
+| columnNo | Number | true  | 报错代码起始列|
+| lineNo  | Number | true | 报错代码起始行 |
+| errorType | String | true | 错误类型 |
+| error | String | true | 完整异常信息 | 
+| isTrusted | String | true | 是否为用户操作事件导致的异常 |
+| msg | String | true | 异常信息 |
+| path | String | true | 页面路径 |
+| time | long | true | 异常产生时间戳 |
+| userAgent | String | true | 用户信息Navigator.userAgent(操作系统版本、浏览器内核、浏览器版本)|
+| timeLocalString | String | true | 格式化后的时间 |
+|id               | String | true | 唯一id|
+
+#### ajax网络异常日志字段 
+这里引用了lajax的重写XHR的方法
+
+| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------:|
+| type   | String | true | 错误类型, 代码错误或ajax错误 |
+| time   | String | true    | 该条日志记录时间 |
+| level  | String | true    | 该条日志的级别，分为 info、warn、error 3 种 |
+| messages | Array | true   | 数组的第一个元素是大括号包裹的唯一请求id，之后的所有元素对应调用 logger[level] 依次传入的日志内容: 请求状态、请求耗时、url、请求方式、发送数据、状态码 |
+| url    | String  | true   | 该条日志所在页面的 URL |
+| userAgent | String   | true   | 该条日志所在页面的用户代理 
