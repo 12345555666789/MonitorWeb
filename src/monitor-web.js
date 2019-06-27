@@ -17,7 +17,7 @@ if (!('toJSON' in ErrorEvent.prototype)) {
     });
 }
 
-class MonitorWeb {
+export class MonitorWeb {
     constructor(param) {
         let config = param;
         if (typeof config === 'undefined') {

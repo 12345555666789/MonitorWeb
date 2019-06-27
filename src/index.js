@@ -7,4 +7,5 @@
 
 import MonitorWeb from './monitor-web'
 window.MonitorWeb = MonitorWeb ;
-export default MonitorWeb;
+export { MonitorWeb };
+export default MonitorWeb ;
