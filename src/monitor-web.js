@@ -336,9 +336,9 @@ export class MonitorWeb {
             if (event.data === MonitorWeb.workerEnmu.retry) {
                 if (this.retryCount >= this.config.maxRetryCount) {
                     clearInterval(this.timer);
-                    if (this.config.isLog) console.log(`发送日志请求的连续失败次数过多，已停止发送日志。请检查日志接口 ${this.url} 是否正常！`);
+                    if (this.config.isLog) console.error(`发送日志请求的连续失败次数过多，已停止发送日志。请检查日志接口 ${this.url} 是否正常！`);
                 } else {
-                    if (this.config.isLog) console.log('配置地址[' + this.config.url + ']上报失败, 等待下次重试 ' + this.retryCount + '...');
+                    if (this.config.isLog) console.warn('配置地址[' + this.config.url + ']上报失败, 等待下次重试 ' + this.retryCount + '...');
                     await idb.delete('MonitorWeb');
                     this.retryCount ++;
                 }

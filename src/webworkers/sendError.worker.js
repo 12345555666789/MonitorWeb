@@ -41,7 +41,7 @@ function sendErrorWorker () {
         try {
             oldErrorJSON = await idb.getItem('MonitorWeb') || {};
         } catch (e) {
-            if (config.isLog) console.log(e);
+            if (config.isLog) console.error(e);
         }
         if (oldErrorJSON.data && oldErrorJSON.data.length) {
             oldErrorJSON.data.push(...newErrorJSON.data)
@@ -51,7 +51,7 @@ function sendErrorWorker () {
         try {
             await idb.setItem('MonitorWeb', oldErrorJSON);
         } catch (e) {
-            if (config.isLog) console.log(e);
+            if (config.isLog) console.error(e);
         }
         sendError(config, oldErrorJSON.data);
     }
@@ -59,10 +59,42 @@ function sendErrorWorker () {
 
 let sendError = (config, errorJSON) => {
     axios.post(config.url, errorJSON).then(async (res) => {
-        if (config.isLog) console.log(errorJSON.length + '条日志上报成功');
+        if (config.isLog) console.info('%c[' + _getTimeString(new Date()) + '] - ' + errorJSON.length + '条日志上报成功！', 'color: green');
         await idb.delete('MonitorWeb');
         postMessage('DONE');
     }).catch(() => {
         postMessage('RETRY');
     });
 };
+
+function _getTimeString(time) {
+    const now = (time === null ? new Date() : time);
+
+    // 时
+    let hour = String(now.getHours());
+    if (hour.length === 1) {
+        hour = `0${hour}`;
+    }
+
+    // 分
+    let minute = String(now.getMinutes());
+    if (minute.length === 1) {
+        minute = `0${minute}`;
+    }
+
+    // 秒
+    let second = String(now.getSeconds());
+    if (second.length === 1) {
+        second = `0${second}`;
+    }
+
+    // 毫秒
+    let millisecond = String(now.getMilliseconds());
+    if (millisecond.length === 1) {
+        millisecond = `00${millisecond}`;
+    } else if (millisecond.length === 2) {
+        millisecond = `0${millisecond}`;
+    }
+
+    return `${hour}:${minute}:${second}.${millisecond}`;
+}
