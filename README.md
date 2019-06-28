@@ -12,11 +12,39 @@
 
 只采集报错异常的相关信息
 
-> npm install monitor-web -S 现在还不行,可以先用dist里面的
+#### 使用方法
 
-> require('monitor-web')
+#####安装
 
-> new MonitorWeb({url:'http://127.0.0.1:8888'})
+```
+npm install monitor-web --save
+```
+##### 引入
+```javascript
+// 自动注册为全局变量
+import 'monitor-web'
+or
+require('monitor-web')
+```
+**CDN**
+```
+<script src="目前还不行"></script>
+```
+
+##### 创建实例
+``` javascript
+	new MonitorWeb('传入上报接口url及配置')
+例如:
+	new MonitorWeb('http://127.0.0.1:8888')
+or:
+    new MonitorWeb({
+        url: 'http://127.0.0.1:8888', // 上报url
+        maxRetryCount: 5, // 上报重试次数
+        reportingCycle: 100000, // 上报周期, 单位:毫秒
+        moduleName: 'SenseAd-focus', // 页面项目名称
+        isLog: true // 是否在控制台打印日志及上报情况
+    });
+```
 
 #### js api配置项
 
@@ -65,3 +93,31 @@
 | messages | Array | true   | 数组的第一个元素是大括号包裹的唯一请求id，之后的所有元素对应调用 logger[level] 依次传入的日志内容: 请求状态、请求耗时、url、请求方式、发送数据、状态码 |
 | url    | String  | true   | 该条日志所在页面的 URL |
 | userAgent | String   | true   | 该条日志所在页面的用户代理 
+
+#### 实例方法
+
+##### catchError  手动将错误信息传入队列
+
+一般在框架内部错误被拦截,无法被全局捕获时, 需使用框架自身的捕获报错的方法来将捕获到的异常信息传入上报队列
+
+如vue有config.errorHandler, react有EerrorBoundary和unstable_handleError的方法;
+
+当然如果有特别需要也可以在try catch中使用.
+
+| 参数 | 类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------:|
+| error | Object | true | 错误信息 |
+
+**以vue举例:**
+```javascript
+// 在main.js中引入后, 自动注册为全局变量
+import 'monitor-web'
+
+// 将创建的实例赋给vue原型中方便调用
+Vue.prototype.$MonitorWeb = new MonitorWeb('http://127.0.0.1:8888')
+
+// 在vue实例的config.errorHandler方法中, 将完整错误信息传入catchError等待上报
+Vue.config.errorHandler = (err, vm, info) => {
+  Vue.prototype.$MonitorWeb.catchError(err)
+}
+```
