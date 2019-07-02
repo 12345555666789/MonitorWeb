@@ -81,6 +81,9 @@ or:
 | userAgent | String | true | 用户信息Navigator.userAgent(操作系统版本、浏览器内核、浏览器版本)|
 | timeLocalString | String | true | 格式化后的时间 |
 |id               | String | true | 唯一id|
+|performance      | Object | true | 性能监控 |
+|::timing         | Object | true | 统计各阶段耗时 |
+|::memory         | Object | true | 内存占用情况 |
 
 #### ajax网络异常日志字段 
 这里引用了lajax的重写XHR的方法
@@ -93,6 +96,8 @@ or:
 | messages | Array | true   | 数组的第一个元素是大括号包裹的唯一请求id，之后的所有元素对应调用 logger[level] 依次传入的日志内容: 请求状态、请求耗时、url、请求方式、发送数据、状态码 |
 | url    | String  | true   | 该条日志所在页面的 URL |
 | userAgent | String   | true   | 该条日志所在页面的用户代理 
+|::timing         | Object | true | 统计各阶段耗时 |
+|::memory         | Object | true | 内存占用情况 |
 
 #### 实例方法
 

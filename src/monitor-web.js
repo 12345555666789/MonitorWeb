@@ -124,6 +124,9 @@ export class MonitorWeb {
 
     // 将框架捕获的报错添加至队列
     catchError (error) {
+        let performance = window.performance ||
+            window.msPerformance ||
+            window.webkitPerformance;
         let log = {
             type: '[onError]',
             messages: error.message || null,
@@ -139,6 +142,7 @@ export class MonitorWeb {
             clickEvents: this.clickEvents || null,
             userAgent: navigator.userAgent || null,
             moduleName: this.config.moduleName,
+            performance: MonitorWeb.formatPerformance(performance),
             id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
         };
         this.queue.push(log);
@@ -177,6 +181,9 @@ export class MonitorWeb {
     exceptionHandler () {
         // 页面onerror捕获异常
         window.addEventListener('error', (error) => {
+            let performance = window.performance ||
+                window.msPerformance ||
+                window.webkitPerformance;
             let log = {
                 type: '[onError]',
                 messages: error.message || null,
@@ -190,6 +197,7 @@ export class MonitorWeb {
                 clickEvents: this.clickEvents || null,
                 userAgent: navigator.userAgent || null,
                 moduleName: this.config.moduleName,
+                performance: MonitorWeb.formatPerformance(performance),
                 id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
@@ -198,6 +206,9 @@ export class MonitorWeb {
 
         // Promise捕获异常
         window.addEventListener('unhandledrejection', (event) => {
+            let performance = window.performance ||
+                window.msPerformance ||
+                window.webkitPerformance;
             let log = {
                 type: '[onError]',
                 messages: event.reason || null,
@@ -208,6 +219,7 @@ export class MonitorWeb {
                 timeLocalString: MonitorWeb._getDateTimeString(new Date()),
                 clickEvents: this.clickEvents || null,
                 moduleName: this.config.moduleName,
+                performance: MonitorWeb.formatPerformance(performance),
                 id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
@@ -293,6 +305,9 @@ export class MonitorWeb {
 
     // 将日志添加到队列中
     pushToQueue(time, level, ...args) {
+        let performance = window.performance ||
+            window.msPerformance ||
+            window.webkitPerformance;
         args.unshift(`{${this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)}}`);
         this.queue.push({
             type: '[ajax]',
@@ -301,8 +316,79 @@ export class MonitorWeb {
             level,
             messages: args,
             url: window.location.href,
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
+            performance: MonitorWeb.formatPerformance(performance)
         });
+    }
+
+    static formatPerformance (performance) {
+        try {
+            let timing = performance.timing;
+            let memory = performance.memory;
+            return {
+                times: {
+                    readyStart: {
+                        value: timing.fetchStart - timing.navigationStart,
+                        desc: "准备新页面时间耗时"
+                    },
+                    redirectTime: {
+                        value: timing.redirectEnd - timing.redirectStart,
+                        desc: "重定向耗时"
+                    },
+                    appcacheTime: {
+                        value: timing.domainLookupStart - timing.fetchStart,
+                        desc: "Appcache 耗时"
+                    },
+                    unloadEventTime: {
+                        value: timing.unloadEventEnd - timing.unloadEventStart,
+                        desc: "unload 前文档耗时"
+                    },
+                    lookupDomainTime: {
+                        value: timing.domainLookupEnd - timing.domainLookupStart,
+                        desc: "DNS 查询耗时"
+                    },
+                    connectTime: {
+                        value: timing.connectEnd - timing.connectStart,
+                        desc: "TCP连接耗时"
+                    },
+                    requestTime: {
+                        value: timing.responseEnd - timing.requestStart,
+                        desc: "request请求耗时"
+                    },
+                    initDomTreeTime: {
+                        value: timing.domInteractive - timing.responseEnd,
+                        desc: "请求完毕至DOM加载"
+                    },
+                    domReadyTime: {
+                        value: timing.domContentLoadedEventEnd - timing.navigationStart,
+                        desc: "DOM加载完成"
+                    },
+                    whiteScreenTime: {
+                        value: timing.responseStart - timing.navigationStart,
+                        desc: "白屏时间"
+                    },
+                    loadTime: {
+                        value: timing.loadEventEnd - timing.navigationStart,
+                        desc: "从开始至onload总耗时"
+                    }
+                },
+                memory: {
+                    jsHeapSizeLimit: {
+                        value: memory.jsHeapSizeLimit,
+                        desc: "内存大小限制"
+                    },
+                    totalJSHeapSize: {
+                        value: memory.totalJSHeapSize,
+                        desc: "可使用的内存"
+                    },
+                    usedJSHeapSize: {
+                        value: memory.usedJSHeapSize,
+                        desc: "JS 对象（包括V8引擎内部对象）占用的内存数"
+                    },
+                    tip: "通常，usedJSHeapSize不能大于totalJSHeapSize，如果大于，有可能出现了内存泄漏。"
+                }
+            };
+        } catch (e) {}
     }
 
     //处理日志队列

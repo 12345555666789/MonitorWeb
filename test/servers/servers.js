@@ -1,19 +1,20 @@
 let express = require('express')
 let app = express()
 let bodyParser = require('body-parser')
-
-let bodyParserplugin = bodyParser.urlencoded({ extended: false })
+app.use(bodyParser.json())
+let urlencodedParser = bodyParser.urlencoded({ extended: false });
+app.use(urlencodedParser)
 app.all('*', function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     //Access-Control-Allow-Headers
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Headers', '*');
     res.header('Access-Control-Allow-Methods', '*');
-    res.header('Content-Type', 'application/json;charset=utf-8');
+    // res.header('Content-Type', 'application/json;charset=utf-8');
     next();
 });
 
-app.post('/', bodyParserplugin, function (req, res) {
-    console.log(req.body);
+app.post('/', function (req, res) {
+    console.log(req);
     res.send()
 })
 
