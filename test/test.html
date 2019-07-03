@@ -6,14 +6,12 @@
     <script src="../dist/index.js"></script>
 </head>
 <body>
-<div style="font-size: 25px">捕获结果:<h3 id="syncCatch"></h3></div>
-<div style="font-size: 25px">异步错误:<h3 id="asyncCatch"></h3></div>
-<button id="errBtn">报错1s</button>
+<button id="errBtn">报错</button>
 <script>
-    new MonitorWeb({
+    let monitor = new MonitorWeb({
         url: 'http://127.0.0.1:8888',
         maxRetryCount: 5,
-        reportingCycle: 10000,
+        reportingCycle: 5000,
         moduleName: 'SenseAd-focus',
         isLog: true
     });
@@ -23,8 +21,7 @@
     }
     errBtn.onclick=function() {
         var xhr = new XMLHttpRequest();
-        //xhr.setRequestHeader('Authorization', 'Bearer5555')
-        xhr.open('post', 'http://localhost:8888', true);
+        xhr.open('post', 'http://localhost:2222', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {

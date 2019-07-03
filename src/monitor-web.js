@@ -146,6 +146,9 @@ export class MonitorWeb {
             id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
         };
         this.queue.push(log);
+        if (this.retryCount >= this.config.maxRetryCount) {
+            this.send()
+        }
     }
 
     // 清除历史log
@@ -201,6 +204,9 @@ export class MonitorWeb {
                 id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
+            if (this.retryCount >= this.config.maxRetryCount) {
+                this.send()
+            }
             // return true // <-- 阻止报错向上传递
         });
 
@@ -223,6 +229,9 @@ export class MonitorWeb {
                 id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
+            if (this.retryCount >= this.config.maxRetryCount) {
+                this.send()
+            }
         });
     }
 
@@ -319,6 +328,9 @@ export class MonitorWeb {
             userAgent: navigator.userAgent,
             performance: MonitorWeb.formatPerformance(performance)
         });
+        if (this.retryCount >= this.config.maxRetryCount) {
+            this.send()
+        }
     }
 
     static formatPerformance (performance) {

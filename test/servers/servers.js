@@ -1,7 +1,6 @@
 let express = require('express')
 let app = express()
 let bodyParser = require('body-parser')
-app.use(bodyParser.json())
 let urlencodedParser = bodyParser.urlencoded({ extended: false });
 app.use(urlencodedParser)
 app.all('*', function (req, res, next) {
