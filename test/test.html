@@ -9,7 +9,7 @@
 <button id="errBtn">报错</button>
 <script>
     let monitor = new MonitorWeb({
-        url: 'http://127.0.0.1:8888',
+        url: 'http://10.1.125.2:7300/api/monitor',
         maxRetryCount: 5,
         reportingCycle: 5000,
         moduleName: 'SenseAd-focus',
@@ -21,7 +21,7 @@
     }
     errBtn.onclick=function() {
         var xhr = new XMLHttpRequest();
-        xhr.open('post', 'http://localhost:2222', true);
+        xhr.open('post', 'www.baidu.com', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {

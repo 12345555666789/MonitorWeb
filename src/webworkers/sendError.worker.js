@@ -1,7 +1,7 @@
 import axios from 'axios'
 let IndexedDB = require('hello-indexeddb');
-globalThis.HelloIndexedDB = IndexedDB;
-const { HelloIndexedDB } = globalThis.HelloIndexedDB;
+self.HelloIndexedDB = IndexedDB;
+const { HelloIndexedDB } = self.HelloIndexedDB;
 let idb = new HelloIndexedDB();
 let config = {};
 sendErrorWorker();
