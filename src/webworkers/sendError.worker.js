@@ -53,7 +53,7 @@ function sendErrorWorker () {
         } catch (e) {
             if (config.isLog) console.error(e);
         }
-        sendError(config, oldErrorJSON.data);
+        sendError(config, oldErrorJSON);
     }
 }
 
