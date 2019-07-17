@@ -324,7 +324,7 @@ export class MonitorWeb {
             moduleName: this.config.moduleName,
             level,
             messages: args,
-            url: window.location.href,
+            path: window.location.href,
             userAgent: navigator.userAgent,
             performance: MonitorWeb.formatPerformance(performance)
         });
