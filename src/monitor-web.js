@@ -105,9 +105,6 @@ export class MonitorWeb {
     }
 
     _init () {
-        // 生成唯一id
-        this.getReqId();
-
         // 自动记录异常
         this.exceptionHandler();
 
@@ -132,7 +129,7 @@ export class MonitorWeb {
             window.msPerformance ||
             window.webkitPerformance;
         let log = {
-            type: '[onError]',
+            logType: '[onError]',
             messages: error.message || null,
             errorType: error.name,
             path: location.href || null,
@@ -147,7 +144,7 @@ export class MonitorWeb {
             userAgent: navigator.userAgent || null,
             moduleName: this.config.moduleName,
             performance: MonitorWeb.formatPerformance(performance),
-            id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
+            id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
         };
         this.queue.push(log);
         if (this.retryCount >= this.config.maxRetryCount) {
@@ -192,7 +189,7 @@ export class MonitorWeb {
                 window.msPerformance ||
                 window.webkitPerformance;
             let log = {
-                type: '[onError]',
+                logType: '[onError]',
                 messages: error.message || null,
                 path: error.filename || null,
                 lineNo: error.lineno || null,
@@ -205,7 +202,7 @@ export class MonitorWeb {
                 userAgent: navigator.userAgent || null,
                 moduleName: this.config.moduleName,
                 performance: MonitorWeb.formatPerformance(performance),
-                id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
+                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
             if (this.retryCount >= this.config.maxRetryCount) {
@@ -220,7 +217,7 @@ export class MonitorWeb {
                 window.msPerformance ||
                 window.webkitPerformance;
             let log = {
-                type: '[onError]',
+                logType: '[onError]',
                 messages: event.reason || null,
                 path: window.location.href || null,
                 errorType: 'PromiseError',
@@ -230,7 +227,7 @@ export class MonitorWeb {
                 clickEvents: this.clickEvents || null,
                 moduleName: this.config.moduleName,
                 performance: MonitorWeb.formatPerformance(performance),
-                id: this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)
+                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
             if (this.retryCount >= this.config.maxRetryCount) {
@@ -321,10 +318,11 @@ export class MonitorWeb {
         let performance = window.performance ||
             window.msPerformance ||
             window.webkitPerformance;
-        args.unshift(`{${this.reqId + '-' + Number(Math.random().toString().substr(2)).toString(36)}}`);
         this.queue.push({
-            type: '[ajax]',
-            time: MonitorWeb._getDateTimeString(time),
+            logType: '[ajax]',
+            id: `${this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)}`,
+            time: new Date().getTime(),
+            timeLocalString: MonitorWeb._getDateTimeString(new Date()),
             moduleName: this.config.moduleName,
             level,
             messages: args,
@@ -458,31 +456,19 @@ export class MonitorWeb {
         const isFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
         return isChrome || isFirefox;
     }
-    //获取或者生成唯一请求 id
+    //生成唯一id
     getReqId() {
-        this.reqId = document.querySelector('[name="_reqId"]') ? document.querySelector('[name="_reqId"]')
-            .content : '';
-        if (!this.reqId) {
-            this.reqId = window._reqId;
+        let time = Date.now();
+        if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+            // 使用更高精度的时间
+            time += performance.now();
         }
-        if (this.reqId) {
-            // 存在 reqId，说明这是一个服务器端生成的页面，设置一个标示
-            this.idFromServer = true;
-        } else {
-            // 如果不存在 reqId，说明这是一个纯前端的页面，就自己生成一个 reqId https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript/8809472#8809472
-            let time = Date.now();
-            if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-                // 使用更高精度的时间
-                time += performance.now();
-            }
-            this.reqId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => {
-                const rand = (time + (Math.random() * 16)) % 16 | 0;
-                time = Math.floor(time / 16);
-                return (char === 'x' ? rand : ((rand & 0x3) | 0x8))
-                    .toString(16);
-            });
-            this.idFromServer = false;
-        }
+        return  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => {
+            const rand = (time + (Math.random() * 16)) % 16 | 0;
+            time = Math.floor(time / 16);
+            return (char === 'x' ? rand : ((rand & 0x3) | 0x8))
+                .toString(16);
+        });
     }
 
     static _getTimeString(time) {

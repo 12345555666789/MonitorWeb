@@ -7,7 +7,10 @@
 
 理论上适用大部分前端项目、PC、移动端、框架、原生
 
+
 由于使用了webworker以及indexDB所以暂不支持服务端渲染 
+
+上报接口仅支持`POST`请求方式
 
 
 #### 使用方法
@@ -37,6 +40,7 @@ or:
         reportingCycle: 100000, // 上报周期, 单位:毫秒
         moduleName: 'SenseAd-focus', // 页面项目名称
         isLog: true // 是否在控制台打印日志及上报情况
+		isHump: false // 上传的日志是否使用驼峰命名风格
     });
 ```
 
@@ -49,12 +53,28 @@ or:
 |::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
 |::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:100000|
 |::moduleName | Number  |  false | 页面模块名称, 如不传则取页面url路径部分第一级 |
-|::isLog | String | false | 是否在控制台打印上报情况|
+|::isLog | boolean | false | 是否在控制台打印上报情况, 默认值:true|
+|::isHump | boolean | false | 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则 |
 
-#### 代码逻辑异常日志字段
+## 日志上报
+**接口及请求参数样例:**
+#### POST /weblog/logreport
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
 |:------|:------:|:-------:|:-------:|
-| type   | String | true | 错误类型, 代码错误或ajax错误 |
+| config | Object | true | js api 配置项|
+|::url   | String |  true   | 上报接口url|
+|::maxRetryCount | Number | true | 日志上报失败重试次数, 默认值: 5 |
+|::reportingCycle | Number | true | 日志自动上报/清理周期, 单位/毫秒,默认值:100000|
+|::moduleName | Number  |  true | 页面模块名称, 如不传则取页面url路径部分第一级 |
+|::isLog | boolean | true | 是否在控制台打印上报情况|
+|::isHump | boolean | false | 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则 |
+|data    | Array(LogData)| true | 异常日志 |
+
+#### 代码逻辑异常日志字段
+##### Object:LogData
+| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------:|
+| logType   | String | true | 错误日志类型, 代码错误或ajax错误 |
 | clickEvents | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
 |::height | Number | false | 浏览器高度px |
 |::width | Number | false | 浏览器宽度px |
@@ -81,10 +101,12 @@ or:
 
 #### ajax网络异常日志字段 
 
+##### Object:LogData
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
 |:------|:------:|:-------:|:-------:|
-| type   | String | true | 错误类型, 代码错误或ajax错误 |
-| time   | String | true    | 该条日志记录时间 |
+| logType   | String | true | 错误日志类型, 代码错误或ajax错误 |
+| time   | long | true    | 该条日志记录时间 |
+| timeLocalString | String | true | 格式化后的时间 |
 | level  | String | true    | 该条日志的级别，分为 info、warn、error 3 种 |
 | messages | Array | true   | 数组的第一个元素是大括号包裹的唯一请求id，之后的所有元素对应调用 logger[level] 依次传入的日志内容: 请求状态、请求耗时、url、请求方式、发送数据、状态码 |
 | path    | String  | true   | 该条日志所在页面的 URL |

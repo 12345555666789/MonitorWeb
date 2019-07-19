@@ -18,7 +18,7 @@ const errorTypes = [
 function analysisError (data) {
     let errors = [...data];
     errors.forEach(item => {
-        if (item.type === '[onError]' && !item.errorType && item.messages) {
+        if (item.logType === '[onError]' && !item.errorType && item.messages) {
             item.errorType = errorTypes.find(errorType => item.messages.indexOf(errorType) !== -1)
         }
     });
@@ -110,9 +110,9 @@ function jsonToUnderline(obj) {
         })
     } else if (obj instanceof Object) {
         Object.keys(obj).forEach(function(key) {
-            let newKey = hump2Underline(key)
+            let newKey = hump2Underline(key);
             if (newKey !== key) {
-                obj[newKey] = obj[key]
+                obj[newKey] = obj[key];
                 delete obj[key]
             }
             jsonToUnderline(obj[newKey])
