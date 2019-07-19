@@ -9,11 +9,12 @@
 <button id="errBtn">报错</button>
 <script>
     let monitor = new MonitorWeb({
-        url: 'http://10.1.125.2:7300/api/monitor',
+        url: 'http://10.100.54.225:80/weblog/logreport',
         maxRetryCount: 5,
-        reportingCycle: 5000,
+        reportingCycle: 1000,
         moduleName: 'SenseAd-focus',
-        isLog: true
+        isLog: true,
+        isHump: false
     });
 
     function errRun () {

@@ -4,7 +4,6 @@ self.HelloIndexedDB = IndexedDB;
 const { HelloIndexedDB } = self.HelloIndexedDB;
 let idb = new HelloIndexedDB();
 let config = {};
-sendErrorWorker();
 
 // 定义错误类型
 const errorTypes = [
@@ -27,39 +26,40 @@ function analysisError (data) {
 }
 
 // 保存并上报错误日志
-function sendErrorWorker () {
-    onmessage = async (event) => {
-        await idb.delete('MonitorWeb');
-        let data = JSON.parse(event.data);
-        let queue = data.queue;
-        let newErrorJSON = {
-            data: analysisError(queue),
-            config: data.config
-        };
-        config = newErrorJSON.config;
-        let oldErrorJSON = {};
-        try {
-            oldErrorJSON = await idb.getItem('MonitorWeb') || {};
-        } catch (e) {
-            if (config.isLog) console.error(e);
-        }
-        if (oldErrorJSON.data && oldErrorJSON.data.length) {
-            oldErrorJSON.data.push(...newErrorJSON.data)
-        } else {
-            oldErrorJSON = newErrorJSON
-        }
-        try {
-            await idb.setItem('MonitorWeb', oldErrorJSON);
-        } catch (e) {
-            if (config.isLog) console.error(e);
-        }
-        sendError(config, oldErrorJSON);
+onmessage = async (event) => {
+    await idb.delete('MonitorWeb');
+    let data = JSON.parse(event.data);
+    let queue = data.queue;
+    let newErrorJSON = {
+        data: analysisError(queue),
+        config: data.config
+    };
+    config = newErrorJSON.config;
+    let oldErrorJSON = {};
+    try {
+        oldErrorJSON = await idb.getItem('MonitorWeb') || {};
+    } catch (e) {
+        if (config.isLog) console.error(e);
     }
+    if (oldErrorJSON.data && oldErrorJSON.data.length) {
+        oldErrorJSON.data.push(...newErrorJSON.data)
+    } else {
+        oldErrorJSON = newErrorJSON
+    }
+    try {
+        await idb.setItem('MonitorWeb', oldErrorJSON);
+    } catch (e) {
+        if (config.isLog) console.error(e);
+    }
+    sendError(config, oldErrorJSON);
 }
 
 let sendError = (config, errorJSON) => {
+    if (!config.isHump) {
+        jsonToUnderline(errorJSON)
+    }
     axios.post(config.url, errorJSON).then(async (res) => {
-        if (config.isLog) console.info('%c[' + _getTimeString(new Date()) + '] - ' + errorJSON.length + '条日志上报成功！', 'color: green');
+        if (config.isLog || config.is_log) console.info('%c[' + _getTimeString(new Date()) + '] - ' + errorJSON.data.length + '条日志上报成功！', 'color: green');
         await idb.delete('MonitorWeb');
         postMessage('DONE');
     }).catch(() => {
@@ -97,4 +97,25 @@ function _getTimeString(time) {
     }
 
     return `${hour}:${minute}:${second}.${millisecond}`;
+}
+
+function hump2Underline(s) {
+    return s.replace(/([A-Z])/g, '_$1').toLowerCase()
+}
+
+function jsonToUnderline(obj) {
+    if (obj instanceof Array) {
+        obj.forEach(function(v, i) {
+            jsonToUnderline(v)
+        })
+    } else if (obj instanceof Object) {
+        Object.keys(obj).forEach(function(key) {
+            let newKey = hump2Underline(key)
+            if (newKey !== key) {
+                obj[newKey] = obj[key]
+                delete obj[key]
+            }
+            jsonToUnderline(obj[newKey])
+        })
+    }
 }

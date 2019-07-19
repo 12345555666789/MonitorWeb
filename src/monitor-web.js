@@ -30,7 +30,8 @@ export class MonitorWeb {
                 reportingCycle: 10000,
                 maxQueueCount: 100,
                 moduleName: location.pathname.split('/')[1] || null,
-                isLog: true
+                isLog: true,
+                isHump: false
             };
         } else if (typeof config === 'object') {
             if (typeof param.url !== 'string') {
@@ -50,6 +51,9 @@ export class MonitorWeb {
             }
             if (typeof param.isLog !== 'boolean') {
                 config.isLog = true
+            }
+            if (typeof param.isHump !== 'boolean') {
+                config.isHump = false
             }
         } else {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数格式不正确！');
