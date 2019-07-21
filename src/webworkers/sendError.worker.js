@@ -58,6 +58,7 @@ let sendError = (config, errorJSON) => {
     if (!config.isHump) {
         jsonToUnderline(errorJSON)
     }
+    postMessage('PENDING');
     axios.post(config.url, errorJSON).then(async (res) => {
         if (config.isLog || config.is_log) console.info('%c[' + _getTimeString(new Date()) + '] - ' + errorJSON.data.length + '条日志上报成功！', 'color: green');
         await idb.delete('MonitorWeb');

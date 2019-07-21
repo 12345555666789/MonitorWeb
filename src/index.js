@@ -5,7 +5,6 @@
  * Date: 2019/07/01
  */
 
-import MonitorWeb from './monitor-web'
-window.MonitorWeb = MonitorWeb ;
-export { MonitorWeb };
-export default MonitorWeb ;
+import {MonitorWeb} from './monitor-web'
+window.MonitorWeb = MonitorWeb;
+export default MonitorWeb

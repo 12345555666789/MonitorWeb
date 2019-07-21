@@ -2,6 +2,7 @@ let path = require('path');
 module.exports = {
     entry: './src/index.js',//入口文件
     output: {//出口配置
+        libraryTarget: "umd",
         path: path.resolve('dist'),//出口文件路径
         filename: "index.js"//出口文件名称
     },

@@ -68,6 +68,9 @@ export class MonitorWeb {
         // 日志上报配置
         this.config = config;
 
+        // 上报请求状态
+        this.sendStatus = MonitorWeb.workerEnmu.ready;
+
         // 是否要格式化 console 打印的内容
         this.stylize = config.stylize == null ? true : config.stylize;
 
@@ -407,7 +410,7 @@ export class MonitorWeb {
 
     //处理日志队列
     send () {
-        if (this.queue && this.queue.length) {
+        if (this.queue && this.queue.length && this.sendStatus === MonitorWeb.workerEnmu.ready) {
             this.saveError()
         }
     }
@@ -426,29 +429,31 @@ export class MonitorWeb {
         worker.postMessage(JSON.stringify(data));
 
         worker.onmessage = async (event) => {
+            // 后台未返回时, 上报状态改为pending, 阻止连续上报
+            if (event.data === MonitorWeb.workerEnmu.pending) {
+                this.sendStatus = MonitorWeb.workerEnmu.pending
+            }
 
             // 上报成功, 清除队列
             if (event.data === MonitorWeb.workerEnmu.done) {
                 this.queue = [];
-                this.retryCount = 1
+                this.retryCount = 1;
+                this.sendStatus = MonitorWeb.workerEnmu.ready
             }
 
             if (event.data === MonitorWeb.workerEnmu.retry) {
                 if (this.retryCount >= this.config.maxRetryCount) {
                     clearInterval(this.timer);
+                    this.sendStatus = MonitorWeb.workerEnmu.ready;
                     if (this.config.isLog) console.error(`发送日志请求的连续失败次数过多，已停止发送日志。请检查日志接口 ${this.url} 是否正常！`);
                 } else {
                     if (this.config.isLog) console.warn('配置地址[' + this.config.url + ']上报失败, 等待下次重试 ' + this.retryCount + '...');
                     await idb.delete('MonitorWeb');
                     this.retryCount ++;
+                    this.sendStatus = MonitorWeb.workerEnmu.ready;
                 }
             }
-
-            //会话结束, 释放内存
-            worker.terminate();
-            worker = null;
         };
-
     };
 
     static _stylizeSupport() {
@@ -618,6 +623,14 @@ MonitorWeb.colorEnum = {
 // webWorker 返回状态枚举
 MonitorWeb.workerEnmu = {
     /**
+     * 等待
+     */
+    ready: 'READY',
+    /**
+     * 等待
+     */
+    pending: 'PENDING',
+    /**
      * 成功
      */
     done: 'DONE',
@@ -632,4 +645,3 @@ MonitorWeb.workerEnmu = {
      */
     failed: 'FAILED'
 };
-export default MonitorWeb
