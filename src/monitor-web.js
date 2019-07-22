@@ -108,11 +108,11 @@ export class MonitorWeb {
     }
 
     _init () {
-        // 自动记录异常
-        this.exceptionHandler();
-
         // 记录点击操作
         this.exceptionClick();
+
+        // 自动记录异常
+        this.exceptionHandler();
 
         // 自动记录ajax请求异常
         this.ajaxHandler();
@@ -143,13 +143,14 @@ export class MonitorWeb {
             isTrusted: error.isTrusted || null,
             time: new Date().getTime(),
             timeLocalString: MonitorWeb._getDateTimeString(new Date()),
-            clickEvents: this.clickEvents || null,
+            clickEvents: [...this.clickEvents] || null,
             userAgent: navigator.userAgent || null,
             moduleName: this.config.moduleName,
             performance: MonitorWeb.formatPerformance(performance),
             id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
         };
         this.queue.push(log);
+        this.clickEvents = [];
         if (this.retryCount >= this.config.maxRetryCount) {
             this.send()
         }
@@ -201,13 +202,14 @@ export class MonitorWeb {
                 isTrusted: error.isTrusted || null,
                 time: new Date().getTime(),
                 timeLocalString: MonitorWeb._getDateTimeString(new Date()),
-                clickEvents: this.clickEvents || null,
+                clickEvents: [...this.clickEvents] || null,
                 userAgent: navigator.userAgent || null,
                 moduleName: this.config.moduleName,
                 performance: MonitorWeb.formatPerformance(performance),
                 id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
+            this.clickEvents = [];
             if (this.retryCount >= this.config.maxRetryCount) {
                 this.send()
             }
@@ -227,12 +229,13 @@ export class MonitorWeb {
                 userAgent: navigator.userAgent || null,
                 time: new Date().getTime(),
                 timeLocalString: MonitorWeb._getDateTimeString(new Date()),
-                clickEvents: this.clickEvents || null,
+                clickEvents: [...this.clickEvents] || null,
                 moduleName: this.config.moduleName,
                 performance: MonitorWeb.formatPerformance(performance),
                 id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
+            this.clickEvents = [];
             if (this.retryCount >= this.config.maxRetryCount) {
                 this.send()
             }
