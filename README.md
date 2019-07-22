@@ -1,17 +1,12 @@
 ### web前端日志及上报方案
 
-目的是帮助开发者第一时间能够知晓线上项目的异常情况, 通过日志的信息就可以判断问题
+通过收集前端异常报错信息, 帮助开发者判断线上项目产生的问题;
 
-目前这个脚本的功能是通过监听一些事件, 来收集异常的信息, 一旦出现异常报错就添加到"队列", 定时任务每过一段时间就会把队列中的异常日志上报到服务器中
-如果上报失败就暂存到本地indexDB存储等待下次上报
+适用大部分前端项目、PC、移动端、框架、原生
 
-理论上适用大部分前端项目、PC、移动端、框架、原生
-
-
-由于使用了webworker以及indexDB所以暂不支持服务端渲染 
+`注意`由于使用了indexDB作为本地存储, 所以暂不支持服务端渲染 
 
 上报接口仅支持`POST`请求方式
-
 
 #### 使用方法
 
@@ -22,18 +17,20 @@ npm install monitor-web --save
 ```
 ##### 引入
 ```javascript
-// 自动注册为全局变量
-import 'monitor-web'
-or
+import MonitorWeb 'monitor-web'
+// 或者使用require引入, 会自动注册为全局变量, 可供直接调用
 require('monitor-web')
+window.MonitorWeb
+
+// 也可以使用静态或动态创建script标签的方式引入效果同require一样
+<script src="node_modules/monitor-web/dist/index.js"></script>
 ```
 
 ##### 创建实例
+`new MonitorWeb('传入上报接口url及配置')`
 ``` javascript
-	new MonitorWeb('传入上报接口url及配置')
-例如:
 	new MonitorWeb('http://127.0.0.1:8888')
-or:
+// 或者根据需要传入更多配置项
     new MonitorWeb({
         url: 'http://127.0.0.1:8888', // 上报url
         maxRetryCount: 5, // 上报重试次数
@@ -57,7 +54,7 @@ or:
 |::isHump | boolean | false | 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则 |
 
 ## 日志上报
-**接口及请求参数样例:**
+**接口及参数样例:**
 #### POST /weblog/logreport
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
 |:------|:------:|:-------:|:-------:|
