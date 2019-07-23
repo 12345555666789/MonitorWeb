@@ -18,28 +18,42 @@ npm install monitor-web --save
 ##### 引入
 ```javascript
 import MonitorWeb 'monitor-web'
-// 或者使用require引入, 会自动注册为全局变量, 可供直接调用
+```
+或者使用require引入, 会自动注册为全局变量, 可供直接调用
+```javascript
 require('monitor-web')
 window.MonitorWeb
-
-// 也可以使用静态或动态创建script标签的方式引入效果同require一样
+new MonitorWeb('/*your report url*/')
+```
+也可以使用静态或动态创建script标签的方式引入效果同require一样
+```html
 <script src="node_modules/monitor-web/dist/index.js"></script>
-// 注意, Vue用这样的方式进入可能会报错
-// Uncaught SyntaxError: Unexpected token <
-// 解决办法是将第三方依赖的 JS 文件放到 /static/utils 目录下，引入路径也改成：<script src="./static/utils/monitor-web.js"></script>
+
+```
+
+注意, Vue用这样的方式进入可能会报错
+
+`Uncaught SyntaxError: Unexpected token <`
+
+解决办法是将第三方依赖的 JS 文件放到 /static/utils 目录下，引入路径也改成：
+```html
+<script src="./static/utils/monitor-web.js"></script>
 ```
 
 ##### 创建实例
 `new MonitorWeb('传入上报接口url及配置')`
 ``` javascript
 	new MonitorWeb('http://127.0.0.1:8888')
-// 或者根据需要传入更多配置项
+```
+	
+或根据需要传入更多配置项
+```javascript
     new MonitorWeb({
         url: 'http://127.0.0.1:8888', // 上报url
         maxRetryCount: 5, // 上报重试次数
         reportingCycle: 100000, // 上报周期, 单位:毫秒
         moduleName: 'SenseAd-focus', // 页面项目名称
-        isLog: true // 是否在控制台打印日志及上报情况
+        isLog: true, // 是否在控制台打印日志及上报情况
 		isHump: false // 上传的日志是否使用驼峰命名风格
     });
 ```
