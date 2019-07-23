@@ -24,6 +24,9 @@ window.MonitorWeb
 
 // 也可以使用静态或动态创建script标签的方式引入效果同require一样
 <script src="node_modules/monitor-web/dist/index.js"></script>
+// 注意, Vue用这样的方式进入可能会报错
+// Uncaught SyntaxError: Unexpected token <
+// 解决办法是将第三方依赖的 JS 文件放到 /static/utils 目录下，引入路径也改成：<script src="./static/utils/monitor-web.js"></script>
 ```
 
 ##### 创建实例
@@ -129,7 +132,7 @@ window.MonitorWeb
 **以vue举例:**
 ```javascript
 // 在main.js中引入后, 自动注册为全局变量
-import 'monitor-web'
+import MonitorWeb 'monitor-web'
 
 // 将创建的实例赋给vue原型中方便调用
 Vue.prototype.$MonitorWeb = new MonitorWeb('http://127.0.0.1:8888')
