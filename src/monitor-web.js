@@ -427,6 +427,16 @@ export class MonitorWeb {
 
     // 存储日志队列
     saveError () {
+        // 自动补齐协议及域名
+        if (this.config.url.indexOf('http') === -1) {
+            let origin = window.location.origin;
+            if (this.config.url.indexOf('/') === 0) {
+                this.config.url = origin + this.config.url
+            } else {
+                this.config.url = origin + '/' + this.config.url
+            }
+        }
+
         // 每次最多上报数条
         let data = {
             isFile: this.isFile,
