@@ -1,8 +1,5 @@
 import axios from 'axios'
-let IndexedDB = require('hello-indexeddb');
-self.HelloIndexedDB = IndexedDB;
-const { HelloIndexedDB } = self.HelloIndexedDB;
-let idb = new HelloIndexedDB();
+import HelloIndexedDB from 'hello-indexeddb'
 let config = {};
 
 // 定义错误类型
@@ -27,9 +24,12 @@ function analysisError (data) {
 
 // 保存并上报错误日志
 onmessage = async (event) => {
-    await idb.delete('MonitorWeb');
     let data = JSON.parse(event.data);
     let queue = data.queue;
+    self.idb = null;
+    self.isFile = data.isFile;
+    !self.isFile ? self.idb = new HelloIndexedDB() : null;
+    !self.isFile ? await self.idb.delete('MonitorWeb') : null;
     let newErrorJSON = {
         data: analysisError(queue),
         config: data.config
@@ -37,7 +37,11 @@ onmessage = async (event) => {
     config = newErrorJSON.config;
     let oldErrorJSON = {};
     try {
-        oldErrorJSON = await idb.getItem('MonitorWeb') || {};
+        if (!self.isFile) {
+            oldErrorJSON = await self.idb.getItem('MonitorWeb') || {};
+        } else {
+            oldErrorJSON = {}
+        }
     } catch (e) {
         if (config.isLog) console.error(e);
     }
@@ -47,12 +51,12 @@ onmessage = async (event) => {
         oldErrorJSON = newErrorJSON
     }
     try {
-        await idb.setItem('MonitorWeb', oldErrorJSON);
+        !self.isFile ? await self.idb.setItem('MonitorWeb', oldErrorJSON) : null;
     } catch (e) {
         if (config.isLog) console.error(e);
     }
     sendError(config, oldErrorJSON);
-}
+};
 
 let sendError = (config, errorJSON) => {
     if (!config.isHump) {
@@ -61,7 +65,7 @@ let sendError = (config, errorJSON) => {
     postMessage('PENDING');
     axios.post(config.url, errorJSON).then(async (res) => {
         if (config.isLog || config.is_log) console.info('%c[' + _getTimeString(new Date()) + '] - ' + errorJSON.data.length + '条日志上报成功！', 'color: green');
-        await idb.delete('MonitorWeb');
+        !self.isFile ? await self.idb.delete('MonitorWeb') : null;
         postMessage('DONE');
     }).catch(() => {
         postMessage('RETRY');

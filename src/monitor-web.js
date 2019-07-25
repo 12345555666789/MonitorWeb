@@ -59,6 +59,12 @@ export class MonitorWeb {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数格式不正确！');
         }
 
+        // 创建多线程处理队列
+        this.worker = new sendErrorWorker();
+
+        // 是否是file协议
+        this.isFile = window.location.protocol === 'file:';
+
         // 日志上报地址
         this.url = config.url;
 
@@ -150,7 +156,6 @@ export class MonitorWeb {
             id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
         };
         this.queue.push(log);
-        this.clickEvents = [];
         if (this.retryCount >= this.config.maxRetryCount) {
             this.send()
         }
@@ -158,21 +163,25 @@ export class MonitorWeb {
 
     // 清除历史log
     async clearHistory () {
-        let history = await idb.getItem('MonitorWeb');
-        if (history && history.data.length) {
-            this.queue.push(...history.data);
+        if (!this.isFile) {
+            let history = await idb.getItem('MonitorWeb');
+            if (history && history.data.length) {
+                this.queue.push(...history.data);
+            }
+            await idb.delete('MonitorWeb')
         }
-        await idb.delete('MonitorWeb')
     }
     // 记录点击事件
     exceptionClick () {
         document.addEventListener('click',(e) => {
             let path = [];
+            this.clickEvents = [];
             e.path.forEach((item) => {
                 path.unshift({
                     nodeName: item.nodeName || 'WINDOW',
                     className: item.className || null,
-                    id: item.id || null
+                    id: item.id || null,
+                    outerHTML: item.outerHTML || null
                 })
             });
             this.clickEvents.unshift({
@@ -209,11 +218,9 @@ export class MonitorWeb {
                 id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
-            this.clickEvents = [];
             if (this.retryCount >= this.config.maxRetryCount) {
                 this.send()
             }
-            // return true // <-- 阻止报错向上传递
         });
 
         // Promise捕获异常
@@ -235,7 +242,6 @@ export class MonitorWeb {
                 id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
             this.queue.push(log);
-            this.clickEvents = [];
             if (this.retryCount >= this.config.maxRetryCount) {
                 this.send()
             }
@@ -319,7 +325,7 @@ export class MonitorWeb {
         }
     }
 
-    // 将日志添加到队列中
+    // 将ajax日志添加到队列中
     pushToQueue(time, level, ...args) {
         let performance = window.performance ||
             window.msPerformance ||
@@ -334,7 +340,8 @@ export class MonitorWeb {
             messages: args,
             path: window.location.href,
             userAgent: navigator.userAgent,
-            performance: MonitorWeb.formatPerformance(performance)
+            performance: MonitorWeb.formatPerformance(performance),
+            clickEvents: [...this.clickEvents] || null
         });
         if (this.retryCount >= this.config.maxRetryCount) {
             this.send()
@@ -420,18 +427,16 @@ export class MonitorWeb {
 
     // 存储日志队列
     saveError () {
-        // 创建多线程处理队列
-        let worker = new sendErrorWorker();
-
         // 每次最多上报数条
         let data = {
+            isFile: this.isFile,
             config: this.config,
             queue: this.queue.slice(0, this.config.maxQueueCount)
         };
 
-        worker.postMessage(JSON.stringify(data));
+        this.worker.postMessage(JSON.stringify(data));
 
-        worker.onmessage = async (event) => {
+        this.worker.onmessage = async (event) => {
             // 后台未返回时, 上报状态改为pending, 阻止连续上报
             if (event.data === MonitorWeb.workerEnmu.pending) {
                 this.sendStatus = MonitorWeb.workerEnmu.pending
@@ -451,7 +456,7 @@ export class MonitorWeb {
                     if (this.config.isLog) console.error(`发送日志请求的连续失败次数过多，已停止发送日志。请检查日志接口 ${this.url} 是否正常！`);
                 } else {
                     if (this.config.isLog) console.warn('配置地址[' + this.config.url + ']上报失败, 等待下次重试 ' + this.retryCount + '...');
-                    await idb.delete('MonitorWeb');
+                    !this.isFile ? await idb.delete('MonitorWeb') : null;
                     this.retryCount ++;
                     this.sendStatus = MonitorWeb.workerEnmu.ready;
                 }

@@ -98,6 +98,7 @@ new MonitorWeb('/*your report url*/')
 |::::nodeName | String | false | 标签名称 |
 |::::className | String | false | 标签类名 |
 |::::id | String | false | 标签ID |
+|::::outerHTML | String | false | 点击元素标签以及子元素 |
 | columnNo | Number | true  | 报错代码起始列|
 | lineNo  | Number | true | 报错代码起始行 |
 | errorType | String | true | 错误类型 |
@@ -128,6 +129,7 @@ new MonitorWeb('/*your report url*/')
 |performance      | Object | true | 性能监控 | 
 |::timing         | Object | true | 统计各阶段耗时 |
 |::memory         | Object | true | 内存占用情况 |
+| clickEvents | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
 
 #### 实例方法
 
