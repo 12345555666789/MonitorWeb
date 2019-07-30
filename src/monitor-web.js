@@ -180,8 +180,7 @@ export class MonitorWeb {
                 path.unshift({
                     nodeName: item.nodeName || 'WINDOW',
                     className: item.className || null,
-                    id: item.id || null,
-                    outerHTML: item.outerHTML || null
+                    id: item.id || null
                 })
             });
             this.clickEvents.unshift({
@@ -189,7 +188,8 @@ export class MonitorWeb {
                 y: e.pageY,
                 width: window.innerWidth,
                 height: window.innerHeight,
-                path: path
+                path: path,
+                outerHtml: e.target.outerHTML
             });
         });
     }
