@@ -4,9 +4,9 @@
 
 适用大部分前端项目、PC、移动端、框架、原生
 
-`注意`由于使用了indexDB作为本地存储, 所以暂不支持服务端渲染 
+`注意`由于使用了indexDB作为本地存储, 暂不支持服务端渲染 
 
-上报接口仅支持`POST`请求方式
+上报接口请求方式为`POST`, 暂不支持更改
 
 #### 使用方法
 
@@ -28,7 +28,6 @@ new MonitorWeb('/*your report url*/')
 也可以使用静态或动态创建script标签的方式引入效果同require一样
 ```html
 <script src="node_modules/monitor-web/dist/index.js"></script>
-
 ```
 
 注意, Vue用这样的方式进入可能会报错
@@ -41,74 +40,65 @@ new MonitorWeb('/*your report url*/')
 ```
 
 ##### 创建实例
-`new MonitorWeb('传入上报接口url及配置')`
-``` javascript
-	new MonitorWeb('http://127.0.0.1:8888')
-```
-	
-或根据需要传入更多配置项
 ```javascript
     new MonitorWeb({
-        url: 'http://127.0.0.1:8888', // 上报url
+        url: 'http://127.0.0.1:8888', // 上报url 必传!
         maxRetryCount: 5, // 上报重试次数
-        reportingCycle: 100000, // 上报周期, 单位:毫秒
-        moduleName: 'SenseAd-focus', // 页面项目名称
+        reportingCycle: 10000, // 上报周期, 单位:毫秒
+        moduleName: 'focus', // 页面项目名称 必传!
         isLog: true, // 是否在控制台打印日志及上报情况
-		isHump: false // 上传的日志是否使用驼峰命名风格
     });
 ```
 
 #### js api配置项
 
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
-|:------|:------:|:-------:|:-------:|
-| config | Object | true    |配置对象,创建实例时传入, 默认值: 无 |
-|::url   | String |  true   | 上报接口url|
+|:------|:------:|:-------:|:-------|
+| config | Object | true    |配置对象 |
+|::url   | String |  true   | 上报接口url 必传 |
 |::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
 |::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
-|::moduleName | String  |  false | 页面模块名称, 如不传则取页面url路径部分第一级 |
+|::moduleName | String  |  true | 页面模块名称, 必传 |
 |::isLog | boolean | false | 是否在控制台打印上报情况, 默认值:true|
-|::isHump | boolean | false | 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则 |
 
 ## 日志上报
 **接口及参数样例:**
 #### POST /weblog/logreport
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
-|:------|:------:|:-------:|:-------:|
-| config | Object | true | js api 配置项|
+|:------|:------:|:-------:|:-------|
+| config | Object | true    |配置对象 |
 |::url   | String |  true   | 上报接口url|
-|::maxRetryCount | Number | true | 日志上报失败重试次数, 默认值: 5 |
-|::reportingCycle | Number | true | 日志自动上报/清理周期, 单位/毫秒,默认值:100000|
-|::moduleName | Number  |  true | 页面模块名称, 如不传则取页面url路径部分第一级 |
-|::isLog | boolean | true | 是否在控制台打印上报情况|
-|::isHump | boolean | false | 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则 |
+|::max_retry_count | Number | true | 日志上报失败重试次数, 默认值: 5 |
+|::reporting_cycle | Number | true | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
+|::module_name | String  |  true | 页面模块名称, 必传 |
+|::is_log | boolean | true | 是否在控制台打印上报情况, 默认值:true|
 |data    | Array(LogData)| true | 异常日志 |
 
 #### 代码逻辑异常日志字段
 ##### Object:LogData
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
-|:------|:------:|:-------:|:-------:|
-| logType   | String | true | 错误日志类型, 代码错误或ajax错误 |
-| clickEvents | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
+|:------|:------:|:-------:|:-------|
+| log_type   | String | true | 错误日志类型, 代码错误或ajax错误 |
+| click_events | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
 |::height | Number | false | 浏览器高度px |
 |::width | Number | false | 浏览器宽度px |
 |::x | Number | false | 鼠标位置x坐标 |
 |::y | Number | false | 鼠标位置y坐标 |
+|::outer_html | String | false | 点击元素标签以及子元素 |
 |::path | Array(Object) | false | 点击事件源路径从window到事件源 |
-|::::nodeName | String | false | 标签名称 |
-|::::className | String | false | 标签类名 |
+|::::node_name | String | false | 标签名称 |
+|::::class_name | String | false | 标签类名 |
 |::::id | String | false | 标签ID |
-|::::outerHTML | String | false | 点击元素标签以及子元素 |
-| columnNo | Number | true  | 报错代码起始列|
-| lineNo  | Number | true | 报错代码起始行 |
-| errorType | String | true | 错误类型 |
+| column_no | Number | true  | 报错代码起始列|
+| line_no  | Number | true | 报错代码起始行 |
+| error_type | String | true | 错误类型 |
 | error | String | true | 完整异常信息 | 
-| isTrusted | String | true | 是否为用户操作事件导致的异常 |
+| is_trusted | String | true | 是否为用户操作事件导致的异常 |
 | msg | String | true | 异常信息 |
 | path | String | true | 页面路径 |
 | time | long | true | 异常产生时间戳 |
-| userAgent | String | true | 用户信息Navigator.userAgent(操作系统版本、浏览器内核、浏览器版本)|
-| timeLocalString | String | true | 格式化后的时间 |
+| user_agent | String | true | 用户信息Navigator.userAgent(操作系统版本、浏览器内核、浏览器版本)|
+| time_local_string | String | true | 格式化后的时间 |
 |id               | String | true | 唯一id|
 |performance      | Object | true | 性能监控 |
 |::timing         | Object | true | 统计各阶段耗时 |
@@ -118,18 +108,27 @@ new MonitorWeb('/*your report url*/')
 
 ##### Object:LogData
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
-|:------|:------:|:-------:|:-------:|
-| logType   | String | true | 错误日志类型, 代码错误或ajax错误 |
+|:------|:------:|:-------:|:-------|
+| log_type   | String | true | 错误日志类型, 代码错误或ajax错误 |
 | time   | long | true    | 该条日志记录时间 |
-| timeLocalString | String | true | 格式化后的时间 |
+| time_local_string | String | true | 格式化后的时间 |
 | level  | String | true    | 该条日志的级别，分为 info、warn、error 3 种 |
 | messages | Array | true   | 数组的第一个元素是大括号包裹的唯一请求id，之后的所有元素对应调用 logger[level] 依次传入的日志内容: 请求状态、请求耗时、url、请求方式、发送数据、状态码 |
 | path    | String  | true   | 该条日志所在页面的 URL |
-| userAgent | String   | true   | 该条日志所在页面的用户代理 |
+| user_agent | String   | true   | 该条日志所在页面的用户代理 |
 |performance      | Object | true | 性能监控 | 
 |::timing         | Object | true | 统计各阶段耗时 |
 |::memory         | Object | true | 内存占用情况 |
-| clickEvents | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
+| click_events | Array(Object) | true | 点击报错时收集到的事件源及html结构路径|
+|::height | Number | false | 浏览器高度px |
+|::width | Number | false | 浏览器宽度px |
+|::x | Number | false | 鼠标位置x坐标 |
+|::y | Number | false | 鼠标位置y坐标 |
+|::outer_html | String | false | 点击元素标签以及子元素 |
+|::path | Array(Object) | false | 点击事件源路径从window到事件源 |
+|::::node_name | String | false | 标签名称 |
+|::::class_name | String | false | 标签类名 |
+|::::id | String | false | 标签ID |
 
 #### 实例方法
 
@@ -148,10 +147,18 @@ new MonitorWeb('/*your report url*/')
 **以vue举例:**
 ```javascript
 // 在main.js中引入后, 自动注册为全局变量
-import MonitorWeb 'monitor-web'
+import MonitorWeb from 'monitor-web'
 
 // 将创建的实例赋给vue原型中方便调用
-Vue.prototype.$MonitorWeb = new MonitorWeb('http://127.0.0.1:8888')
+Vue.prototype.$MonitorWeb = new MonitorWeb(
+    {
+        url: 'http://127.0.0.1:8888', // 上报url 必传!
+        maxRetryCount: 5, // 上报重试次数
+        reportingCycle: 10000, // 上报周期, 单位:毫秒
+        moduleName: 'focus', // 页面项目名称 必传!
+        isLog: true, // 是否在控制台打印日志及上报情况
+    }
+)
 
 // 在vue实例的config.errorHandler方法中, 将完整错误信息传入catchError等待上报
 Vue.config.errorHandler = (err, vm, info) => {

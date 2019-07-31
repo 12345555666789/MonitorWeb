@@ -23,17 +23,7 @@ export class MonitorWeb {
         if (typeof config === 'undefined') {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数不能为空！');
         }
-        if (typeof config === 'string') {
-            config = {
-                url: param,
-                maxRetryCount: 5,
-                reportingCycle: 10000,
-                maxQueueCount: 100,
-                moduleName: location.pathname.split('/')[1] || null,
-                isLog: true,
-                isHump: false
-            };
-        } else if (typeof config === 'object') {
+        if (typeof config === 'object') {
             if (typeof param.url !== 'string') {
                 throw new Error('MonitorWeb初始化错误 - 构造函数的参数 url 必须是一个字符串！');
             }
@@ -43,21 +33,18 @@ export class MonitorWeb {
             if (typeof param.reportingCycle !== 'number') {
                 config.reportingCycle = 10000
             }
-            if (typeof param.maxQueueCount !== 'number') {
-                config.maxQueueCount = 100
-            }
             if (typeof param.moduleName !== 'string') {
-                config.moduleName = location.pathname.split('/')[1] || null
+                throw new Error('MonitorWeb初始化错误 - 构造函数的参数 moduleName 必须是一个字符串！');
             }
             if (typeof param.isLog !== 'boolean') {
                 config.isLog = true
             }
-            if (typeof param.isHump !== 'boolean') {
-                config.isHump = false
-            }
         } else {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数格式不正确！');
         }
+
+        // 日志最大存储与上报数量
+        this.maxQueueCount = 100
 
         // 创建多线程处理队列
         this.worker = new sendErrorWorker();
@@ -73,6 +60,9 @@ export class MonitorWeb {
 
         // 日志上报配置
         this.config = config;
+
+        // 日志字段命名使用下划线风格
+        this.config.isHump = false
 
         // 上报请求状态
         this.sendStatus = MonitorWeb.workerEnmu.ready;
@@ -155,7 +145,7 @@ export class MonitorWeb {
             performance: MonitorWeb.formatPerformance(performance),
             id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
         };
-        this.queue.push(log);
+        this.queue.unshift(log);
         if (this.retryCount >= this.config.maxRetryCount) {
             this.send()
         }
@@ -166,7 +156,7 @@ export class MonitorWeb {
         if (!this.isFile) {
             let history = await idb.getItem('MonitorWeb');
             if (history && history.data.length) {
-                this.queue.push(...history.data);
+                this.queue.unshift(...history.data);
             }
             await idb.delete('MonitorWeb')
         }
@@ -217,7 +207,7 @@ export class MonitorWeb {
                 performance: MonitorWeb.formatPerformance(performance),
                 id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
-            this.queue.push(log);
+            this.queue.unshift(log);
             if (this.retryCount >= this.config.maxRetryCount) {
                 this.send()
             }
@@ -241,7 +231,7 @@ export class MonitorWeb {
                 performance: MonitorWeb.formatPerformance(performance),
                 id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
             };
-            this.queue.push(log);
+            this.queue.unshift(log);
             if (this.retryCount >= this.config.maxRetryCount) {
                 this.send()
             }
@@ -330,7 +320,7 @@ export class MonitorWeb {
         let performance = window.performance ||
             window.msPerformance ||
             window.webkitPerformance;
-        this.queue.push({
+        this.queue.unshift({
             logType: '[ajax]',
             id: `${this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)}`,
             time: new Date().getTime(),
@@ -441,7 +431,7 @@ export class MonitorWeb {
         let data = {
             isFile: this.isFile,
             config: this.config,
-            queue: this.queue.slice(0, this.config.maxQueueCount)
+            queue: this.queue.slice(0, this.maxQueueCount)
         };
 
         this.worker.postMessage(JSON.stringify(data));

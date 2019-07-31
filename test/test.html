@@ -12,19 +12,8 @@
         url: 'weblog/logreport',
         maxRetryCount: 5,
         reportingCycle: 1000,
-        moduleName: 'SenseAd-focus',
-        isLog: true,
-        isHump: true
-    });
-
-
-    new MonitorWeb({
-        url: 'http://127.0.0.1:8888', // 上报url
-        maxRetryCount: 5, // 上报重试次数
-        reportingCycle: 100000, // 上报周期, 单位:毫秒
-        moduleName: 'SenseAd-focus', // 页面项目名称
-        isLog: true, // 是否在控制台打印日志及上报情况
-        isHump: false // 上传的日志是否使用驼峰命名风格
+        moduleName: 'focus',
+        isLog: true
     });
 
     function errRun () {

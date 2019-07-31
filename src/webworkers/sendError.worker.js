@@ -60,6 +60,7 @@ onmessage = async (event) => {
 
 let sendError = (config, errorJSON) => {
     if (!config.isHump) {
+        delete  config.isHump
         jsonToUnderline(errorJSON)
     }
     postMessage('PENDING');

@@ -26,18 +26,8 @@ export default class MonitorWeb {
              * 是否在控制台打印上报情况, 默认值:true
              * @default true
              */
-            isLog?: boolean,
-            /**
-             * 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则
-             * @default false
-             */
-            isHump?: boolean,
-            /**
-             * 日志队列最大数量, 默认100条
-             * @default 100
-             */
-            maxQueueCount?: number
-        } | string,
+            isLog?: boolean
+        }
     )
     /**
      * 手动捕获报错函数
