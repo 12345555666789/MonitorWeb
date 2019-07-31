@@ -17,7 +17,7 @@ npm install monitor-web --save
 ```
 ##### 引入
 ```javascript
-import MonitorWeb 'monitor-web'
+import MonitorWeb from 'monitor-web'
 ```
 或者使用require引入, 会自动注册为全局变量, 可供直接调用
 ```javascript
@@ -65,8 +65,8 @@ new MonitorWeb('/*your report url*/')
 | config | Object | true    |配置对象,创建实例时传入, 默认值: 无 |
 |::url   | String |  true   | 上报接口url|
 |::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
-|::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:100000|
-|::moduleName | Number  |  false | 页面模块名称, 如不传则取页面url路径部分第一级 |
+|::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
+|::moduleName | String  |  false | 页面模块名称, 如不传则取页面url路径部分第一级 |
 |::isLog | boolean | false | 是否在控制台打印上报情况, 默认值:true|
 |::isHump | boolean | false | 日志json的key是否使用驼峰命名, 默认值:false 默认使用下划线规则 |
 

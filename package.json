@@ -22,6 +22,7 @@
   "description": "web前端监控及日志上报方案",
   "version": "1.0.29",
   "main": "dist/index.js",
+  "typings": "./index.d.ts",
   "directories": {
     "doc": "doc",
     "test": "test"
