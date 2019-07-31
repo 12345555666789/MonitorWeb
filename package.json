@@ -20,7 +20,7 @@
     "transform-runtime": "0.0.0"
   },
   "description": "web前端监控及日志上报方案",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "main": "dist/index.js",
   "typings": "./index.d.ts",
   "directories": {
