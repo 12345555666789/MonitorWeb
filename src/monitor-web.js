@@ -1,4 +1,4 @@
-import sendErrorWorker from './webworkers/sendError.worker'
+import SendErrorWorker from './webworkers/sendError.worker'
 import HelloIndexedDB from 'hello-indexeddb'
 let idb = new HelloIndexedDB();
 // 使 Error 对象支持 JSON 序列化
@@ -47,7 +47,7 @@ export class MonitorWeb {
         this.maxQueueCount = 100
 
         // 创建多线程处理队列
-        this.worker = new sendErrorWorker();
+        this.worker = new SendErrorWorker();
 
         // 是否是file协议
         this.isFile = window.location.protocol === 'file:';
