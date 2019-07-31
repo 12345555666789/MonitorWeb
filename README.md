@@ -15,28 +15,9 @@
 ```
 npm install monitor-web --save
 ```
-##### 引入
+##### 导入
 ```javascript
 import MonitorWeb from 'monitor-web'
-```
-或者使用require引入, 会自动注册为全局变量, 可供直接调用
-```javascript
-require('monitor-web')
-window.MonitorWeb
-new MonitorWeb('/*your report url*/')
-```
-也可以使用静态或动态创建script标签的方式引入效果同require一样
-```html
-<script src="node_modules/monitor-web/dist/index.js"></script>
-```
-
-注意, Vue用这样的方式进入可能会报错
-
-`Uncaught SyntaxError: Unexpected token <`
-
-解决办法是将第三方依赖的 JS 文件放到 /static/utils 目录下，引入路径也改成：
-```html
-<script src="./static/utils/monitor-web.js"></script>
 ```
 
 ##### 创建实例
