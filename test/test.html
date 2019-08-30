@@ -7,7 +7,12 @@
 </head>
 <body>
 <button id="errBtn"><span>报错</span></button>
+<script src="http://eruda.liriliri.io/eruda.min.js"></script>
 <script>
+	eruda.init()
+</script>
+<script>
+
     let monitor = new MonitorWeb({
         url: 'http://localhost:8888',
         maxRetryCount: 5,

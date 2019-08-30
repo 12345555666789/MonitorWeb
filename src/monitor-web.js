@@ -166,13 +166,15 @@ export class MonitorWeb {
         document.addEventListener('click',(e) => {
             let path = [];
             this.clickEvents = [];
-            e.path.forEach((item) => {
-                path.unshift({
-                    nodeName: item.nodeName || 'WINDOW',
-                    className: item.className || null,
-                    id: item.id || null
-                })
-            });
+            if (e.path) {
+                e.path.forEach((item) => {
+                    path.unshift({
+                        nodeName: item.nodeName || 'WINDOW',
+                        className: item.className || null,
+                        id: item.id || null
+                    })
+                });
+            }
             this.clickEvents.unshift({
                 x: e.pageX,
                 y: e.pageY,
