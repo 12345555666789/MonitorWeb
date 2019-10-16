@@ -1,4 +1,5 @@
 import SendErrorWorker from './webworkers/sendError.worker'
+import PointReportWorker from './webworkers/pointReport.worker'
 import HelloIndexedDB from 'hello-indexeddb'
 let idb = new HelloIndexedDB();
 // 使 Error 对象支持 JSON 序列化
@@ -20,6 +21,7 @@ if (!('toJSON' in ErrorEvent.prototype)) {
 export class MonitorWeb {
     constructor(param) {
         let config = param;
+        let analysisConfig = null
         if (typeof config === 'undefined') {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数不能为空！');
         }
@@ -39,6 +41,23 @@ export class MonitorWeb {
             if (typeof param.isLog !== 'boolean') {
                 config.isLog = true
             }
+
+            // 埋点配置
+            if (typeof config.analysisConfig === 'object') {
+                analysisConfig = config.analysisConfig
+                if (typeof analysisConfig.url !== 'string') {
+                    analysisConfig.url = config.url
+                }
+                if (typeof analysisConfig.appName !== 'string') {
+                    analysisConfig.appName = config.moduleName
+                }
+                if (!analysisConfig.sid && typeof analysisConfig.sid !== 'string' || typeof analysisConfig.sid !== 'number') {
+                    throw new Error('MonitorWeb初始化错误 - 构造函数的参数 analysisConfig.sid 必须是一个有效字符串或数字！');
+                }
+                if (!analysisConfig.appid && typeof analysisConfig.appid !== 'string' || typeof analysisConfig.appid !== 'number') {
+                    throw new Error('MonitorWeb初始化错误 - 构造函数的参数 analysisConfig.appid 必须是一个有效字符串或数字！');
+                }
+            }
         } else {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数格式不正确！');
         }
@@ -48,6 +67,17 @@ export class MonitorWeb {
 
         // 创建多线程处理队列
         this.worker = new SendErrorWorker();
+
+        // 创建埋点多线程处理
+        this.pointReportWorker = new PointReportWorker();
+
+        // 创建设备唯一ID
+        this.uuid = localStorage.getItem('monitor_uuid')
+        if (!this.uuid) {
+            let uuid = this.getReqId()
+            localStorage.setItem('monitor_uuid', uuid)
+            this.uuid = uuid
+        }
 
         // 是否是file协议
         this.isFile = window.location.protocol === 'file:';
@@ -120,6 +150,22 @@ export class MonitorWeb {
         this.timer = setInterval(() => {
             this.send()
         }, this.config.reportingCycle)
+
+        this.clickStat('initPage')
+    }
+
+    // 自定义埋点
+    clickStat (eventName, params) {
+        let data = {
+            config: this.config,
+            pointParams: params || '',
+            pointName: eventName,
+            uuid: this.uuid,
+            userAgent: navigator.userAgent || null,
+            performance: MonitorWeb.formatPerformance(performance),
+            timeLocalString: MonitorWeb._getDateTimeString(new Date())
+        };
+        this.pointReportWorker.postMessage(JSON.stringify(data));
     }
 
     // 将框架捕获的报错添加至队列
@@ -143,7 +189,8 @@ export class MonitorWeb {
             userAgent: navigator.userAgent || null,
             moduleName: this.config.moduleName,
             performance: MonitorWeb.formatPerformance(performance),
-            id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
+            id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
+            uuid: this.uuid
         };
         this.queue.unshift(log);
         if (this.retryCount >= this.config.maxRetryCount) {
@@ -207,7 +254,8 @@ export class MonitorWeb {
                 userAgent: navigator.userAgent || null,
                 moduleName: this.config.moduleName,
                 performance: MonitorWeb.formatPerformance(performance),
-                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
+                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
+                uuid: this.uuid
             };
             this.queue.unshift(log);
             if (this.retryCount >= this.config.maxRetryCount) {
@@ -231,7 +279,8 @@ export class MonitorWeb {
                 clickEvents: [...this.clickEvents] || null,
                 moduleName: this.config.moduleName,
                 performance: MonitorWeb.formatPerformance(performance),
-                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)
+                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
+                uuid: this.uuid
             };
             this.queue.unshift(log);
             if (this.retryCount >= this.config.maxRetryCount) {

@@ -14,26 +14,32 @@
 <script>
 
     let monitor = new MonitorWeb({
-        url: 'http://localhost:8888',
+        url: 'http://10.1.124.175:8888',
         maxRetryCount: 5,
         reportingCycle: 1000,
-        moduleName: 'focus',
-        isLog: true
+        moduleName: 'localTest',
+        isLog: true,
+	    analysisConfig: {
+            sid: 7068999,
+            appid: 8069777,
+            appName: '本地测试应用'
+        }
     });
 
     function errRun () {
         errRun()
     }
     errBtn.onclick=function() {
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', 'www.baidu.com', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-            }
-        }
-        xhr.send()
-        errRun();
+        // var xhr = new XMLHttpRequest();
+        // xhr.open('post', 'www.baidu.com', true);
+        // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+        // xhr.onreadystatechange = function () {
+        //     if (xhr.readyState === 4 && xhr.status === 200) {
+        //     }
+        // }
+        // xhr.send()
+	    monitor.clickStat('testLoad', {adName: '广告1', id: 'XXX'})
+        // errRun();
     }
 </script>
 </body>
