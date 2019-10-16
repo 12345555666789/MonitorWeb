@@ -26,11 +26,22 @@ export default class MonitorWeb {
              * 是否在控制台打印上报情况, 默认值:true
              * @default true
              */
-            isLog?: boolean
+            isLog?: boolean,
+            /**
+             * 埋点配置
+             * @default undefined
+             */
+            analysisConfig?: any
+
         }
     )
     /**
      * 手动捕获报错函数
      */
     catchError(err: any): void;
+
+    /**
+     * 埋点函数
+     */
+    clickStat(eventName: string, params?: any): void;
 }
