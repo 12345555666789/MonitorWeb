@@ -241,7 +241,10 @@ Vue.config.errorHandler = (err, vm, info) => {
 |::module_name | String  |  true | 页面模块名称, 必传 |
 |::is_log | Boolean | true | 是否在控制台打印上报情况, 默认值:true|
 |::analysis_config | Boolean | false | 埋点配置 |
-|::::url | 
+|::::url | String  | true | 埋点上报接口url |
+|::::sid | String / Number | true | 分析账户ID |
+|::::appid | String / Number | true | 分析账户下appID |
+|::::appName | String | true | App名称 |
 | point_params    | Any | false | 埋点自定义携带参数 |
 | point_name | String | false | 埋点事件名 |
 | uuid | String | true | 设备ID |
