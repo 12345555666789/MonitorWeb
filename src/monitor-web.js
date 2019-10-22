@@ -158,12 +158,14 @@ export class MonitorWeb {
     clickStat (eventName, params) {
         let data = {
             config: this.config,
-            pointParams: params || '',
-            pointName: eventName,
-            uuid: this.uuid,
-            userAgent: navigator.userAgent || null,
-            performance: MonitorWeb.formatPerformance(performance),
-            timeLocalString: MonitorWeb._getDateTimeString(new Date())
+            data: [{
+                pointParams: params || '',
+                pointName: eventName,
+                uuid: this.uuid,
+                userAgent: navigator.userAgent || null,
+                performance: MonitorWeb.formatPerformance(performance),
+                timeLocalString: MonitorWeb._getDateTimeString(new Date())
+            }],
         };
         this.pointReportWorker.postMessage(JSON.stringify(data));
     }
