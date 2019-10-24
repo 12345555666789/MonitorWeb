@@ -1,4 +1,4 @@
-export default class MonitorWeb {
+export class MonitorWeb {
     constructor(
         /**
          * 监控配置项
@@ -26,20 +26,41 @@ export default class MonitorWeb {
              * 是否在控制台打印上报情况, 默认值:true
              * @default true
              */
-            isLog?: boolean,
-            /**
-             * 埋点配置
-             * @default undefined
-             */
-            analysisConfig?: any
-
+            isLog?: boolean
         }
     )
     /**
      * 手动捕获报错函数
      */
     catchError(err: any): void;
+}
+export class AnalysisWeb {
+    constructor(
+        /**
+         * 埋点配置项
+         */
+        config: {
+            /**
+             * 上报地址, 必填
+             */
+            url?: string,
 
+            /**
+             * sid, 必填
+             */
+            sid: string,
+
+            /**
+             * appid, 必填
+             */
+            appid: string,
+
+            /**
+             * appName, 必填
+             */
+            appName: string
+        }
+    )
     /**
      * 埋点函数
      */

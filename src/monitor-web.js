@@ -1,5 +1,5 @@
 import SendErrorWorker from './webworkers/sendError.worker'
-import PointReportWorker from './webworkers/pointReport.worker'
+import Fn from './function'
 import HelloIndexedDB from 'hello-indexeddb'
 let idb = new HelloIndexedDB();
 // 使 Error 对象支持 JSON 序列化
@@ -21,7 +21,6 @@ if (!('toJSON' in ErrorEvent.prototype)) {
 export class MonitorWeb {
     constructor(param) {
         let config = param;
-        let analysisConfig = null
         if (typeof config === 'undefined') {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数不能为空！');
         }
@@ -41,23 +40,6 @@ export class MonitorWeb {
             if (typeof param.isLog !== 'boolean') {
                 config.isLog = true
             }
-
-            // 埋点配置
-            if (typeof config.analysisConfig === 'object') {
-                analysisConfig = config.analysisConfig
-                if (typeof analysisConfig.url !== 'string') {
-                    analysisConfig.url = config.url
-                }
-                if (typeof analysisConfig.appName !== 'string') {
-                    analysisConfig.appName = config.moduleName
-                }
-                if (!analysisConfig.sid && typeof analysisConfig.sid !== 'string' || typeof analysisConfig.sid !== 'number') {
-                    throw new Error('MonitorWeb初始化错误 - 构造函数的参数 analysisConfig.sid 必须是一个有效字符串或数字！');
-                }
-                if (!analysisConfig.appid && typeof analysisConfig.appid !== 'string' || typeof analysisConfig.appid !== 'number') {
-                    throw new Error('MonitorWeb初始化错误 - 构造函数的参数 analysisConfig.appid 必须是一个有效字符串或数字！');
-                }
-            }
         } else {
             throw new Error('MonitorWeb初始化错误 - 构造函数的参数格式不正确！');
         }
@@ -68,13 +50,10 @@ export class MonitorWeb {
         // 创建多线程处理队列
         this.worker = new SendErrorWorker();
 
-        // 创建埋点多线程处理
-        this.pointReportWorker = new PointReportWorker();
-
         // 创建设备唯一ID
         this.uuid = localStorage.getItem('monitor_uuid')
         if (!this.uuid) {
-            let uuid = this.getReqId()
+            let uuid = Fn.getReqId()
             localStorage.setItem('monitor_uuid', uuid)
             this.uuid = uuid
         }
@@ -150,24 +129,6 @@ export class MonitorWeb {
         this.timer = setInterval(() => {
             this.send()
         }, this.config.reportingCycle)
-
-        this.clickStat('initPage')
-    }
-
-    // 自定义埋点
-    clickStat (eventName, params) {
-        let data = {
-            config: this.config,
-            data: [{
-                pointParams: params || '',
-                pointName: eventName,
-                uuid: this.uuid,
-                userAgent: navigator.userAgent || null,
-                performance: MonitorWeb.formatPerformance(performance),
-                timeLocalString: MonitorWeb._getDateTimeString(new Date())
-            }],
-        };
-        this.pointReportWorker.postMessage(JSON.stringify(data));
     }
 
     // 将框架捕获的报错添加至队列
@@ -186,12 +147,12 @@ export class MonitorWeb {
             script: error.script || null,
             isTrusted: error.isTrusted || null,
             time: new Date().getTime(),
-            timeLocalString: MonitorWeb._getDateTimeString(new Date()),
+            timeLocalString: Fn._getDateTimeString(new Date()),
             clickEvents: [...this.clickEvents] || null,
             userAgent: navigator.userAgent || null,
             moduleName: this.config.moduleName,
-            performance: MonitorWeb.formatPerformance(performance),
-            id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
+            performance: Fn.formatPerformance(performance),
+            id: Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
             uuid: this.uuid
         };
         this.queue.unshift(log);
@@ -251,12 +212,12 @@ export class MonitorWeb {
                 error: error.error.stack || null,
                 isTrusted: error.isTrusted || null,
                 time: new Date().getTime(),
-                timeLocalString: MonitorWeb._getDateTimeString(new Date()),
+                timeLocalString: Fn._getDateTimeString(new Date()),
                 clickEvents: [...this.clickEvents] || null,
                 userAgent: navigator.userAgent || null,
                 moduleName: this.config.moduleName,
-                performance: MonitorWeb.formatPerformance(performance),
-                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
+                performance: Fn.formatPerformance(performance),
+                id: Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
                 uuid: this.uuid
             };
             this.queue.unshift(log);
@@ -277,11 +238,11 @@ export class MonitorWeb {
                 errorType: 'PromiseError',
                 userAgent: navigator.userAgent || null,
                 time: new Date().getTime(),
-                timeLocalString: MonitorWeb._getDateTimeString(new Date()),
+                timeLocalString: Fn._getDateTimeString(new Date()),
                 clickEvents: [...this.clickEvents] || null,
                 moduleName: this.config.moduleName,
-                performance: MonitorWeb.formatPerformance(performance),
-                id: this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
+                performance: Fn.formatPerformance(performance),
+                id: Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
                 uuid: this.uuid
             };
             this.queue.unshift(log);
@@ -375,90 +336,20 @@ export class MonitorWeb {
             window.webkitPerformance;
         this.queue.unshift({
             logType: '[ajax]',
-            id: `${this.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)}`,
+            id: `${Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)}`,
             time: new Date().getTime(),
-            timeLocalString: MonitorWeb._getDateTimeString(new Date()),
+            timeLocalString: Fn._getDateTimeString(new Date()),
             moduleName: this.config.moduleName,
             level,
             messages: args,
             path: window.location.href,
             userAgent: navigator.userAgent,
-            performance: MonitorWeb.formatPerformance(performance),
+            performance: Fn.formatPerformance(performance),
             clickEvents: [...this.clickEvents] || null
         });
         if (this.retryCount >= this.config.maxRetryCount) {
             this.send()
         }
-    }
-
-    static formatPerformance (performance) {
-        try {
-            let timing = performance.timing;
-            let memory = performance.memory;
-            return {
-                times: {
-                    readyStart: {
-                        value: timing.fetchStart - timing.navigationStart,
-                        desc: "准备新页面时间耗时"
-                    },
-                    redirectTime: {
-                        value: timing.redirectEnd - timing.redirectStart,
-                        desc: "重定向耗时"
-                    },
-                    appcacheTime: {
-                        value: timing.domainLookupStart - timing.fetchStart,
-                        desc: "Appcache 耗时"
-                    },
-                    unloadEventTime: {
-                        value: timing.unloadEventEnd - timing.unloadEventStart,
-                        desc: "unload 前文档耗时"
-                    },
-                    lookupDomainTime: {
-                        value: timing.domainLookupEnd - timing.domainLookupStart,
-                        desc: "DNS 查询耗时"
-                    },
-                    connectTime: {
-                        value: timing.connectEnd - timing.connectStart,
-                        desc: "TCP连接耗时"
-                    },
-                    requestTime: {
-                        value: timing.responseEnd - timing.requestStart,
-                        desc: "request请求耗时"
-                    },
-                    initDomTreeTime: {
-                        value: timing.domInteractive - timing.responseEnd,
-                        desc: "请求完毕至DOM加载"
-                    },
-                    domReadyTime: {
-                        value: timing.domContentLoadedEventEnd - timing.navigationStart,
-                        desc: "DOM加载完成"
-                    },
-                    whiteScreenTime: {
-                        value: timing.responseStart - timing.navigationStart,
-                        desc: "白屏时间"
-                    },
-                    loadTime: {
-                        value: timing.loadEventEnd - timing.navigationStart,
-                        desc: "从开始至onload总耗时"
-                    }
-                },
-                memory: {
-                    jsHeapSizeLimit: {
-                        value: memory.jsHeapSizeLimit,
-                        desc: "内存大小限制"
-                    },
-                    totalJSHeapSize: {
-                        value: memory.totalJSHeapSize,
-                        desc: "可使用的内存"
-                    },
-                    usedJSHeapSize: {
-                        value: memory.usedJSHeapSize,
-                        desc: "JS 对象（包括V8引擎内部对象）占用的内存数"
-                    },
-                    tip: "通常，usedJSHeapSize不能大于totalJSHeapSize，如果大于，有可能出现了内存泄漏。"
-                }
-            };
-        } catch (e) {}
     }
 
     //处理日志队列
@@ -522,80 +413,12 @@ export class MonitorWeb {
         const isFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
         return isChrome || isFirefox;
     }
-    //生成唯一id
-    getReqId() {
-        let time = Date.now();
-        if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-            // 使用更高精度的时间
-            time += performance.now();
-        }
-        return  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, char => {
-            const rand = (time + (Math.random() * 16)) % 16 | 0;
-            time = Math.floor(time / 16);
-            return (char === 'x' ? rand : ((rand & 0x3) | 0x8))
-                .toString(16);
-        });
-    }
-
-    static _getTimeString(time) {
-        const now = (time === null ? new Date() : time);
-
-        // 时
-        let hour = String(now.getHours());
-        if (hour.length === 1) {
-            hour = `0${hour}`;
-        }
-
-        // 分
-        let minute = String(now.getMinutes());
-        if (minute.length === 1) {
-            minute = `0${minute}`;
-        }
-
-        // 秒
-        let second = String(now.getSeconds());
-        if (second.length === 1) {
-            second = `0${second}`;
-        }
-
-        // 毫秒
-        let millisecond = String(now.getMilliseconds());
-        if (millisecond.length === 1) {
-            millisecond = `00${millisecond}`;
-        } else if (millisecond.length === 2) {
-            millisecond = `0${millisecond}`;
-        }
-
-        return `${hour}:${minute}:${second}.${millisecond}`;
-    }
-
-    // 获取日期时间字符串
-    static _getDateTimeString(time) {
-        const now = (time === null ? new Date() : time);
-
-        // 年
-        const year = String(now.getFullYear());
-
-        // 月
-        let month = String(now.getMonth() + 1);
-        if (month.length === 1) {
-            month = `0${month}`;
-        }
-
-        // 日
-        let day = String(now.getDate());
-        if (day.length === 1) {
-            day = `0${day}`;
-        }
-
-        return `${year}-${month}-${day} ${MonitorWeb._getTimeString(now)}`;
-    }
 
     // 调用系统 console 打印日志
     _printConsole(time, level, ...args) {
         if (console && this.config.isLog) {
             if (this.stylize) {
-                console[level](`%c[${MonitorWeb._getTimeString(time)}] [${level.toUpperCase()}] -`, `color: ${MonitorWeb.colorEnum[level]}`, ...args);
+                console[level](`%c[${Fn._getTimeString(time)}] [${level.toUpperCase()}] -`, `color: ${MonitorWeb.colorEnum[level]}`, ...args);
             } else {
                 console[level](...args);
             }

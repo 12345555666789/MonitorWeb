@@ -7,39 +7,30 @@
 </head>
 <body>
 <button id="errBtn"><span>报错</span></button>
-<script src="http://eruda.liriliri.io/eruda.min.js"></script>
+<!--<script src="http://eruda.liriliri.io/eruda.min.js"></script>-->
 <script>
-	eruda.init()
+	// eruda.init()
 </script>
 <script>
-
-    let monitor = new MonitorWeb({
-        url: 'http://10.1.124.175:8888',
+	let monitor = new MonitorWeb({
+        url: 'http://localhost:8888',
         maxRetryCount: 5,
         reportingCycle: 1000,
         moduleName: 'localTest',
-        isLog: true,
-	    analysisConfig: {
-            sid: 7068999,
-            appid: 8069777,
-            appName: '本地测试应用'
-        }
+        isLog: true
     });
-
+    let analysisWeb = new AnalysisWeb({
+	    url: 'http://localhost:8888',
+	    sid: 7068999,
+	    appid: 8069777,
+	    appName: '本地测试应用'
+    })
     function errRun () {
         errRun()
     }
     errBtn.onclick=function() {
-        // var xhr = new XMLHttpRequest();
-        // xhr.open('post', 'www.baidu.com', true);
-        // xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-        // xhr.onreadystatechange = function () {
-        //     if (xhr.readyState === 4 && xhr.status === 200) {
-        //     }
-        // }
-        // xhr.send()
-	    monitor.clickStat('testLoad', {adName: '广告1', id: 'XXX'})
-        // errRun();
+	    analysisWeb.clickStat('testLoad', {adName: '广告1', id: 'XXX'})
+        errRun();
     }
 </script>
 </body>
