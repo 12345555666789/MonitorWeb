@@ -6,26 +6,10 @@
 npm install monitor-web --save
 ```
 ##### 导入
+功能分为`MonitorWeb`异常监控, 和`AnalysisWeb`埋点分析两部分, 可根据需要导入
 ```javascript
-import MonitorWeb from 'monitor-web'
+import {MonitorWeb, AnalysisWeb} from 'monitor-web'
 ```
-
-##### js api配置项
-
-| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
-|:------|:------:|:-------:|:-------|
-| config | Object | true    |配置对象 |
-|config::url   | String |  true   | 上报接口url 必传 |
-|config::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
-|config::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
-|config::moduleName | String  |  true | 页面模块名称, 必传 |
-|config::isLog | Boolean | false | 是否在控制台打印上报情况, 默认值:true |
-|config::analysisConfig | Object | false | 埋点配置 |
-|config::analysisConfig::url | String | false | 埋点上报接口Url, 如不传则使用日志接口 |
-|config::analysisConfig::sid | String / Number | true | 分析用户ID |
-|config::analysisConfig::appid | String / Number | true | 分析用户下appID |
-|config::analysisConfig::appName | String | false | app名称, 如不传则使用moduleName |
-
 
 #### 一、前端异常日志采集与上报
 
@@ -38,6 +22,17 @@ import MonitorWeb from 'monitor-web'
 上报接口请求方式为`POST`, 暂不支持更改
 
 ##### 使用方法
+
+##### js api配置项
+
+| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------|
+| config | Object | true    |配置对象 |
+|config::url   | String |  true   | 上报接口url 必传 |
+|config::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
+|config::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
+|config::moduleName | String  |  true | 页面模块名称, 必传 |
+|config::isLog | Boolean | false | 是否在控制台打印上报情况, 默认值:true |
 
 ##### 创建实例
 ```javascript
@@ -166,20 +161,22 @@ Vue.config.errorHandler = (err, vm, info) => {
 
 ##### 使用方法
 
+##### js api配置项
+| 字段名 | 值类型 | 是否必传 | 描述及默认值 |
+|:------|:------:|:-------:|:-------|
+| config | Object | true    |配置对象 |
+|config::url | String | true | 埋点上报接口Url |
+|config::sid | String | true | 分析用户ID |
+|config::appid | String | true | 分析用户下appID |
+|config::appName | String | true | app名称 |
+
 ##### 创建实例
 ```javascript
-    new MonitorWeb({
-        url: 'http://127.0.0.1:8888', // 上报url 必传!
-        maxRetryCount: 5, // 上报重试次数
-        reportingCycle: 10000, // 上报周期, 单位:毫秒
-        moduleName: 'focus', // 页面项目名称 必传!
-        isLog: true, // 是否在控制台打印日志及上报情况
-        analysisConfig: { // 埋点相关配置
+    new AnalysisWeb({ // 埋点相关配置
         	url: 'http://127.0.0.1:8888', // 埋点接口url, 不传则默认使用日志上报url
-        	sid: 1000100, // 用户ID, 必传
-            appid: 1000101, // 用户下该应用ID, 必传
+        	sid: '1000100', // 用户ID, 必传
+            appid: '1000101', // 用户下该应用ID, 必传
             appName: '本地测试应用' // 应用名称, 如不传则默认使用moduleName
-        }
     });
 ```
 
@@ -199,29 +196,22 @@ Vue.config.errorHandler = (err, vm, info) => {
 
 ```javascript
 // 创建实例
-    let monitor = new MonitorWeb({
-        url: 'http://127.0.0.1:8888', // 上报url 必传!
-        maxRetryCount: 5, // 上报重试次数
-        reportingCycle: 10000, // 上报周期, 单位:毫秒
-        moduleName: 'focus', // 页面项目名称 必传!
-        isLog: true, // 是否在控制台打印日志及上报情况
-        analysisConfig: { // 埋点相关配置
+    let analysis = new AnalysisWeb({ // 埋点相关配置
         	url: 'http://127.0.0.1:8888', // 埋点接口url, 不传则默认使用日志上报url
-        	sid: 1000100, // 用户ID, 必传
-            appid: 1000101, // 用户下该应用ID, 必传
+        	sid: '1000100', // 用户ID, 必传
+            appid: '1000101', // 用户下该应用ID, 必传
             appName: '本地测试应用' // 应用名称, 如不传则默认使用moduleName
-        }
     });
 
 // 在流程中调用
-    monitor.clickStat('initPage', '进入页面')
+    analysis.clickStat('initPage', '进入页面')
 // ...
-    monitor.clickStat('login', {
+    analysis.clickStat('login', {
         name: '登陆成功',
         userID: 'XXX'
     })
 // ...
-    monitor.clickStat('loadList', [
+    analysis.clickStat('loadList', [
         {adName: '广告1', id: 'XXX'},
         {adName: '广告2', id: 'XXX'},
         {adName: '广告3', id: 'XXX'},
@@ -235,20 +225,14 @@ Vue.config.errorHandler = (err, vm, info) => {
 | 字段名 | 值类型 | 是否必传 | 描述及默认值 |
 |:------|:------:|:-------:|:-------|
 | config | Object | true    |配置对象 |
-|::url   | String |  true   | 上报接口url|
-|::max_retry_count | Number | true | 日志上报失败重试次数, 默认值: 5 |
-|::reporting_cycle | Number | true | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
-|::module_name | String  |  true | 页面模块名称, 必传 |
-|::is_log | Boolean | true | 是否在控制台打印上报情况, 默认值:true|
-|::analysis_config | Boolean | false | 埋点配置 |
-|::::url | String  | true | 埋点上报接口url |
-|::::sid | String / Number | true | 分析账户ID |
-|::::appid | String / Number | true | 分析账户下appID |
-|::::appName | String | true | App名称 |
-| point_params    | Any | false | 埋点自定义携带参数 |
-| point_name | String | false | 埋点事件名 |
-| uuid | String | true | 设备ID |
-| user_agent | Object | true | 用户代理信息 |
-| performance | Object | true | 性能信息 |
-| time_local_string | String | true | 上报时间 |
-
+|config::url | String | true | 埋点上报接口Url |
+|config::sid | String | true | 分析用户ID |
+|config::appid | String | true | 分析用户下appID |
+|config::appName | String | true | app名称 |
+|data | Array(Object) | true | 埋点数据 |
+| data::point_params    | Any | false | 埋点自定义携带参数 |
+| data::point_name | String | false | 埋点事件名 |
+| data::uuid | String | true | 设备ID |
+| data::user_agent | Object | true | 用户代理信息 |
+| data::performance | Object | true | 性能信息 |
+| data::time_local_string | String | true | 上报时间 |
