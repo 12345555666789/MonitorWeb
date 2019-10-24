@@ -62,7 +62,7 @@ import {MonitorWeb, AnalysisWeb} from 'monitor-web'
 **以vue举例:**
 ```javascript
 // 在main.js中引入后, 自动注册为全局变量
-import MonitorWeb from 'monitor-web'
+import {MonitorWeb} from 'monitor-web'
 
 // 将创建的实例赋给vue原型中方便调用
 Vue.prototype.$MonitorWeb = new MonitorWeb(
