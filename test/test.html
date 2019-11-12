@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>全局异常捕获</title>
-    <script src="../dist/index.js"></script>
+    <title>埋点分析</title>
 </head>
 <body>
 <button id="errBtn"><span>报错</span></button>
@@ -12,26 +11,17 @@
 	// eruda.init()
 </script>
 <script>
-	let monitor = new MonitorWeb({
-        url: 'http://localhost:8888',
-        maxRetryCount: 5,
-        reportingCycle: 1000,
-        moduleName: 'localTest',
-        isLog: true
-    });
-    let analysisWeb = new AnalysisWeb({
-	    url: 'http://localhost:8888',
-	    sid: 7068999,
-	    appid: 8069777,
-	    appName: '本地测试应用'
-    })
-    function errRun () {
-        errRun()
-    }
-    errBtn.onclick=function() {
-	    analysisWeb.clickStat('testLoad', {adName: '广告1', id: 'XXX'})
-        errRun();
-    }
+	var monitor = document.createElement("script");
+	var analysisWeb = null
+	monitor.src = "http://oss-senseu.sensetime.com/sensead/assets/js/monitor_web_v2.0.4.js";
+	document.body.appendChild(monitor)
+	monitor.onload = function () {
+		analysisWeb = new AnalysisWeb({
+			url: '你的上报接口url',
+			appid: 8069777,
+			appName: '你的应用名'
+		})
+	}
 </script>
 </body>
 </html>

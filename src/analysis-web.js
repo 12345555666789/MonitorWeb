@@ -11,9 +11,6 @@ export class AnalysisWeb {
 			if (typeof config.appName !== 'string') {
 				throw new Error('Analysis初始化错误 - 构造函数的参数 appName 必须是一个字符串！');
 			}
-			if (!config.sid && typeof config.sid + '' !== 'string') {
-				throw new Error('Analysis初始化错误 - 构造函数的参数 config.sid 必须是一个有效字符串！');
-			}
 			if (!config.appid && typeof config.appid + '' !== 'string') {
 				throw new Error('Analysis初始化错误 - 构造函数的参数 config.appid 必须是一个有效字符串或数字！');
 			}

@@ -1,7 +1,7 @@
 ### web前端日志收集及埋点上报方案
 
 ##### 安装
-###### 版本V2.0.4
+###### 版本V2.0.5
 ```
 npm install monitor-web --save
 ```
@@ -166,7 +166,6 @@ Vue.config.errorHandler = (err, vm, info) => {
 |:------|:------:|:-------:|:-------|
 | config | Object | true    |配置对象 |
 |config::url | String | true | 埋点上报接口Url |
-|config::sid | String | true | 分析用户ID |
 |config::appid | String | true | 分析用户下appID |
 |config::appName | String | true | app名称 |
 
@@ -174,7 +173,6 @@ Vue.config.errorHandler = (err, vm, info) => {
 ```javascript
     new AnalysisWeb({ // 埋点相关配置
  		url: 'http://127.0.0.1:8888', // 埋点接口url, 必传
-        sid: '1000100', // 用户ID, 必传
  		appid: '1000101', // 用户下该应用ID, 必传
  		appName: '本地测试应用' // 应用名称, 必传
     });
@@ -199,7 +197,6 @@ Vue.config.errorHandler = (err, vm, info) => {
 // 创建实例
     let analysis = new AnalysisWeb({ // 埋点相关配置
         	url: 'http://127.0.0.1:8888', // 埋点接口url, 不传则默认使用日志上报url
-        	sid: '1000100', // 用户ID, 必传
             appid: '1000101', // 用户下该应用ID, 必传
             appName: '本地测试应用' // 应用名称, 如不传则默认使用moduleName
     });
@@ -227,7 +224,6 @@ Vue.config.errorHandler = (err, vm, info) => {
 |:------|:------:|:-------:|:-------|
 | config | Object | true    |配置对象 |
 |config::url | String | true | 埋点上报接口Url |
-|config::sid | String | true | 分析用户ID |
 |config::appid | String | true | 分析用户下appID |
 |config::appName | String | true | app名称 |
 |data | Array(Object) | true | 埋点数据 |

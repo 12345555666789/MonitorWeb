@@ -13,6 +13,11 @@ const errorTypes = [
     'promiseError' // 异步错误
 ];
 function analysisError (data) {
+    if(!Array.prototype.find){
+        Array.prototype.find = function(callback) {
+            return callback && (this.filter(callback)|| [])[0];
+        };
+    }
     let errors = [...data];
     errors.forEach(item => {
         if (item.logType === '[onError]' && !item.errorType && item.messages) {

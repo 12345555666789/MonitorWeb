@@ -46,11 +46,6 @@ export class AnalysisWeb {
             url?: string,
 
             /**
-             * sid, 必填
-             */
-            sid: string,
-
-            /**
              * appid, 必填
              */
             appid: string,
