@@ -136,10 +136,88 @@ function formatPerformance (performance) {
 	} catch (e) {}
 }
 
+function hump2Underline(s) {
+	return s.replace(/([A-Z])/g, '_$1').toLowerCase()
+}
+
+function jsonToUnderline(obj) {
+	if (obj instanceof Array) {
+		obj.forEach(function(v, i) {
+			jsonToUnderline(v)
+		})
+	} else if (obj instanceof Object) {
+		Object.keys(obj).forEach(function(key) {
+			let newKey = hump2Underline(key);
+			if (newKey !== key) {
+				obj[newKey] = obj[key];
+				delete obj[key]
+			}
+			jsonToUnderline(obj[newKey])
+		})
+	}
+}
+
+function ajax(opt) {
+	opt = opt || {};
+	opt.method = opt.method.toUpperCase() || 'POST';
+	opt.url = opt.url || '';
+	opt.async = typeof opt.async !== 'boolean' ? opt.async : true;
+	opt.data = opt.data || null;
+	opt.success = opt.success || function () {};
+	var xmlHttp = null;
+	if (XMLHttpRequest) {
+		xmlHttp = new XMLHttpRequest();
+	}
+	else {
+		xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+	}
+	var params = [];
+	for (var key in opt.data){
+		params.push(key + '=' + opt.data[key]);
+	}
+	var postData = params.join('&');
+	if (opt.method.toUpperCase() === 'POST') {
+		xmlHttp.open(opt.method, opt.url, opt.async);
+		xmlHttp.send(JSON.stringify(opt.data));
+	}
+	else if (opt.method.toUpperCase() === 'GET') {
+		xmlHttp.open(opt.method, opt.url + '?' + postData, opt.async);
+		xmlHttp.send(null);
+	}
+	xmlHttp.onreadystatechange = function () {
+		if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+			opt.success(xmlHttp.responseText);
+		}
+	};
+}
+
+// 定义错误类型
+const errorTypes = [
+	'SyntaxError', // 语法错误
+	'ReferenceError', // 引用错误
+	'RangeError', // 范围错误
+	'TypeError', // 类型错误
+	'URLError', // URL错误
+	'EvalError', // Eval错误
+	'promiseError' // 异步错误
+]
+
+function analysisError (data) {
+	let errors = [...data]
+	errors.forEach(item => {
+		if (item.logType === '[onError]' && !item.errorType && item.messages) {
+			item.errorType = errorTypes.filter(errorType => item.messages.indexOf(errorType) !== -1)[0]
+		}
+	})
+	return errors
+}
 
 export default {
 	_getTimeString,
 	_getDateTimeString,
 	getReqId,
-	formatPerformance
+	formatPerformance,
+	jsonToUnderline,
+	ajax,
+	analysisError
 }

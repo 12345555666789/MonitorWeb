@@ -1,6 +1,7 @@
 {
   "name": "monitor-web",
   "dependencies": {
+    "@babel/polyfill": "^7.7.0",
     "axios": "^0.19.0",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.2.1",
@@ -28,8 +29,10 @@
     "test": "test"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.5",
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.2",
     "@babel/plugin-external-helpers": "^7.2.0",
+    "@babel/preset-env": "^7.7.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-runtime": "^6.23.0",

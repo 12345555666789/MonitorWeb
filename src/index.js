@@ -4,7 +4,7 @@
  * Author: Zexing
  * Date: 2019/07/01
  */
-
+import "babel-polyfill"
 import {MonitorWeb} from './monitor-web'
 import {AnalysisWeb} from './analysis-web'
 export {AnalysisWeb, MonitorWeb}

@@ -1,6 +1,6 @@
 import SendErrorWorker from './webworkers/sendError.worker'
 import Fn from './function'
-import HelloIndexedDB from 'hello-indexeddb'
+import HelloIndexedDB from './indb/hello-indexeddb'
 let idb = new HelloIndexedDB();
 // 使 Error 对象支持 JSON 序列化
 if (!('toJSON' in ErrorEvent.prototype)) {
@@ -50,16 +50,19 @@ export class MonitorWeb {
         // 创建多线程处理队列
         this.worker = new SendErrorWorker();
 
-        // 创建设备唯一ID
-        this.uuid = localStorage.getItem('monitor_uuid')
-        if (!this.uuid) {
-            let uuid = Fn.getReqId()
-            localStorage.setItem('monitor_uuid', uuid)
-            this.uuid = uuid
-        }
-
         // 是否是file协议
         this.isFile = window.location.protocol === 'file:';
+
+        // 创建设备唯一ID
+        this.uuid = ''
+        if (!this.isFile) {
+            this.uuid = localStorage.getItem('monitor_uuid')
+            if (!this.uuid) {
+                let uuid = Fn.getReqId()
+                localStorage.setItem('monitor_uuid', uuid)
+                this.uuid = uuid
+            }
+        }
 
         // 日志上报地址
         this.url = config.url;
@@ -107,6 +110,8 @@ export class MonitorWeb {
 
         // xhr 原生 send 方法
         this.xhrSend = XMLHttpRequest.prototype.send;
+
+        this.isIE = !!window.ActiveXObject || "ActiveXObject" in window
 
         // 初始化
         this._init()
@@ -359,6 +364,25 @@ export class MonitorWeb {
         }
     }
 
+    // 使用原生ajax上报
+    sendSync (data) {
+        let errorJSON = {
+            data: Fn.analysisError(data.queue),
+            config: data.config
+        }
+        if (!data.config.isHump) {
+            delete data.config.isHump
+            Fn.jsonToUnderline(errorJSON)
+        }
+        Fn.ajax({
+            method: 'POST',
+            url: data.config.url,
+            data: errorJSON,
+            async: false
+        })
+        this.queue = []
+    }
+
     // 存储日志队列
     saveError () {
         // 自动补齐协议及域名
@@ -377,8 +401,11 @@ export class MonitorWeb {
             config: this.config,
             queue: this.queue.slice(0, this.maxQueueCount)
         };
-
-        this.worker.postMessage(JSON.stringify(data));
+        if (this.isIE) {
+            this.sendSync(data)
+        } else {
+            this.worker.postMessage(JSON.stringify(data));
+        }
 
         this.worker.onmessage = async (event) => {
             // 后台未返回时, 上报状态改为pending, 阻止连续上报
@@ -390,6 +417,7 @@ export class MonitorWeb {
             if (event.data === MonitorWeb.workerEnmu.done) {
                 this.queue = [];
                 this.retryCount = 1;
+                !this.isFile ? await idb.delete('MonitorWeb') : null;
                 this.sendStatus = MonitorWeb.workerEnmu.ready
             }
 
