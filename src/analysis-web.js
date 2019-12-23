@@ -8,9 +8,6 @@ export class AnalysisWeb {
 			if (typeof config.url !== 'string') {
 				throw new Error('Analysis初始化错误 - 构造函数的参数 url 必须是一个字符串！');
 			}
-			if (typeof config.appName !== 'string') {
-				throw new Error('Analysis初始化错误 - 构造函数的参数 appName 必须是一个字符串！');
-			}
 			if (!config.appid && typeof config.appid + '' !== 'string') {
 				throw new Error('Analysis初始化错误 - 构造函数的参数 config.appid 必须是一个有效字符串或数字！');
 			}
@@ -31,7 +28,10 @@ export class AnalysisWeb {
 		this.isFile = !!(self.location && self.location.protocol === 'file:');
 
 		// 日志上报配置
-		this.config = config;
+		this.config = {
+			url: config.url,
+			appid: config.appid
+		};
 
 		// 日志字段命名使用下划线风格
 		this.config.isHump = false
@@ -39,15 +39,23 @@ export class AnalysisWeb {
 		this._init()
 	}
 	_init() {
-		this.clickStat('initPage')
+		this.clickStat('-1')
 	}
 	// 自定义埋点
-	clickStat (eventName, params) {
+	clickStat (pointName, params) {
+		let paramsString = params
+		try {
+			if (paramsString) {
+				paramsString = JSON.stringify(params)
+			}
+		} catch (e) {
+			paramsString = ''
+		}
 		let data = {
 			config: this.config,
 			data: [{
-				pointParams: params || '',
-				pointName: eventName,
+				pointParams: paramsString || '',
+				pointName,
 				uuid: this.uuid,
 				userAgent: navigator.userAgent || null,
 				performance: Fn.formatPerformance(performance),
