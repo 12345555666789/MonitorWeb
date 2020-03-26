@@ -211,7 +211,8 @@ export class MonitorWeb {
             let log = {
                 logType: '[onError]',
                 messages: error.message || null,
-                path: error.filename || null,
+                path: location.href || null,
+                filename: error.filename || null,
                 lineNo: error.lineno || null,
                 columnNo: error.colno || null,
                 error: error.error.stack || null,
@@ -304,6 +305,7 @@ export class MonitorWeb {
                                     messages.push('表单数据：', data);
                                 }
                                 messages.push(`状态码：${this.status}`);
+                                messages.push(`返回数据：${this.response}`);
                                 if (this.status >= 200 && this.status < 400) {
                                     // 暂不记录请求成功的状态
                                     // that.info('[ajax]', ...messages);
@@ -323,6 +325,7 @@ export class MonitorWeb {
                                 messages.push('表单数据：', data);
                             }
                             messages.push(`状态码：${this.status}`);
+                            messages.push(`返回数据：${this.response}`);
                             messages.push(`ERROR：${err}`);
                             that.error('[ajax]', ...messages);
                         }
