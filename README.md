@@ -1,7 +1,7 @@
 ### web前端日志收集及埋点上报方案
 
 ##### 安装
-###### 版本V2.0.8
+###### 版本V2.0.9
 ```
 npm install monitor-web --save
 ```
@@ -53,7 +53,7 @@ import {MonitorWeb, AnalysisWeb} from 'monitor-web'
 
 如vue有config.errorHandler, react有EerrorBoundary和unstable_handleError的方法;
 
-当然如果有特别需要也可以在try catch中使用.
+当然, 也可在try catch中使用.
 
 | 参数 | 类型 | 是否必传 | 描述及默认值 |
 |:------|:------:|:-------:|:-------:|
@@ -70,7 +70,7 @@ Vue.prototype.$MonitorWeb = new MonitorWeb(
         url: 'http://127.0.0.1:8888', // 上报url 必传!
         maxRetryCount: 5, // 上报重试次数
         reportingCycle: 10000, // 上报周期, 单位:毫秒
-        moduleName: 'focus', // 页面项目名称 必传!
+        moduleName: '项目名称', // 项目名称 必传!
         isLog: true, // 是否在控制台打印日志及上报情况
     }
 )
@@ -89,7 +89,7 @@ Vue.config.errorHandler = (err, vm, info) => {
 | config | Object | true    |配置对象 |
 |::url   | String |  true   | 上报接口url|
 |::max_retry_count | Number | true | 日志上报失败重试次数, 默认值: 5 |
-|::reporting_cycle | Number | true | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
+|::reporting_cycle | Number | true | 日志自动上报日志队列周期, 单位/毫秒,默认值:10000|
 |::module_name | String  |  true | 页面模块名称, 必传 |
 |::is_log | boolean | true | 是否在控制台打印上报情况, 默认值:true|
 |data    | Array(LogData)| true | 异常日志 |
@@ -119,10 +119,10 @@ Vue.config.errorHandler = (err, vm, info) => {
 | time | long | true | 异常产生时间戳 |
 | user_agent | String | true | 用户信息Navigator.userAgent(操作系统版本、浏览器内核、浏览器版本)|
 | time_local_string | String | true | 格式化后的时间 |
-|id               | String | true | 唯一id|
 |performance      | Object | true | 性能监控 |
 |::timing         | Object | true | 统计各阶段耗时 |
 |::memory         | Object | true | 内存占用情况 |
+|id               | String | true | 日志唯一ID |
 |uuid             | String | true | 设备唯一ID |
 
 ##### ajax网络异常日志字段 
@@ -134,9 +134,15 @@ Vue.config.errorHandler = (err, vm, info) => {
 | time   | long | true    | 该条日志记录时间 |
 | time_local_string | String | true | 格式化后的时间 |
 | level  | String | true    | 该条日志的级别，分为 info、warn、error 3 种 |
-| messages | Array | true   | 数组的第一个元素是大括号包裹的唯一请求id，之后的所有元素对应调用 logger[level] 依次传入的日志内容: 请求状态、请求耗时、url、请求方式、发送数据、状态码 |
+| messages | Array | true   | 请求状态、请求耗时、url、请求方式、发送数据、接收数据、状态码 |
 | path    | String  | true   | 该条日志所在页面的 URL |
-| user_agent | String   | true   | 该条日志所在页面的用户代理 |
+| code    | Number  | true   | 请求状态码(如: 400、500等) |
+| request_url | String  | true   | 请求URL |
+| request_body | Object | true  | 请求体参数 |
+| method | String  | true   | 请求方式(如: "GET"、"POST"等) |
+| response | String  | true   | 返回数据 |
+| spend_time | Number  | true   | 请求耗时 |
+| user_agent | String  | true   | 用户信息Navigator.userAgent(操作系统版本、浏览器内核、浏览器版本) |
 |performance      | Object | true | 性能监控 | 
 |::timing         | Object | true | 统计各阶段耗时 |
 |::memory         | Object | true | 内存占用情况 |
@@ -150,6 +156,7 @@ Vue.config.errorHandler = (err, vm, info) => {
 |::::node_name | String | false | 标签名称 |
 |::::class_name | String | false | 标签类名 |
 |::::id | String | false | 标签ID |
+|id               | String | true | 日志唯一ID |
 |uuid             | String | true | 设备唯一ID |
 
 

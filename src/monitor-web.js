@@ -295,6 +295,7 @@ export class MonitorWeb {
                                 const costTime = (endTime - startTime) / 1000;
 
                                 const messages = [];
+                                const ajaxErrorJSON = {}
                                 if (this.status >= 200 && this.status < 400) {
                                     messages.push('接口请求成功。');
                                 } else {
@@ -304,13 +305,21 @@ export class MonitorWeb {
                                 if (this._MonitorWebMethod.toLowerCase() === 'post') {
                                     messages.push('表单数据：', data);
                                 }
+                                if (data) {
+                                    ajaxErrorJSON.requestBody = data
+                                }
+                                ajaxErrorJSON.code = this.status
+                                ajaxErrorJSON.response = this.response
+                                ajaxErrorJSON.spendTime = costTime
+                                ajaxErrorJSON.requestUrl = this._MonitorWebUrl
+                                ajaxErrorJSON.method = this._MonitorWebMethod
                                 messages.push(`状态码：${this.status}`);
                                 messages.push(`返回数据：${this.response}`);
                                 if (this.status >= 200 && this.status < 400) {
                                     // 暂不记录请求成功的状态
                                     // that.info('[ajax]', ...messages);
                                 } else {
-                                    that.error('[ajax]', ...messages);
+                                    that.error(ajaxErrorJSON, '[ajax]', ...messages);
                                 }
 
                                 if (console && console.group) {
@@ -318,16 +327,31 @@ export class MonitorWeb {
                                 }
                             }
                         } catch (err) {
+                            // 请求结束时间
+                            const endTime = new Date();
+
+                            // 请求耗时
+                            const costTime = (endTime - startTime) / 1000;
+
+                            const ajaxErrorJSON = {}
                             const messages = [];
                             messages.push('接口请求出错！');
                             messages.push(`URL：${this._MonitorWebUrl} 请求方式：${this._MonitorWebMethod}`);
                             if (this._MonitorWebMethod.toLowerCase() === 'post') {
                                 messages.push('表单数据：', data);
                             }
+                            if (data) {
+                                ajaxErrorJSON.requestBody = data
+                            }
+                            ajaxErrorJSON.code = this.status
+                            ajaxErrorJSON.response = this.response
+                            ajaxErrorJSON.spendTime = costTime
+                            ajaxErrorJSON.requestUrl = this._MonitorWebUrl
+                            ajaxErrorJSON.method = this._MonitorWebMethod
                             messages.push(`状态码：${this.status}`);
                             messages.push(`返回数据：${this.response}`);
                             messages.push(`ERROR：${err}`);
-                            that.error('[ajax]', ...messages);
+                            that.error(ajaxErrorJSON, '[ajax]', ...messages);
                         }
                     }
                 });
@@ -338,7 +362,7 @@ export class MonitorWeb {
     }
 
     // 将ajax日志添加到队列中
-    pushToQueue(time, level, ...args) {
+    pushToQueue(time, level, ajaxErrorJSON, ...args) {
         let performance = window.performance ||
             window.msPerformance ||
             window.webkitPerformance;
@@ -353,7 +377,9 @@ export class MonitorWeb {
             path: window.location.href,
             userAgent: navigator.userAgent,
             performance: Fn.formatPerformance(performance),
-            clickEvents: [...this.clickEvents] || null
+            clickEvents: [...this.clickEvents] || null,
+            uuid: this.uuid,
+            ...ajaxErrorJSON
         });
         if (this.retryCount >= this.config.maxRetryCount) {
             this.send()
@@ -455,12 +481,12 @@ export class MonitorWeb {
             }
         }
     }
-    _log(time, level, ...args) {
+    _log(time, level, ajaxErrorJSON, ...args) {
         // 调用系统 console 打印日志
         this._printConsole(time, level, ...args);
 
         // 将日志添加到队列中
-        this.pushToQueue(time, level, ...args);
+        this.pushToQueue(time, level, ajaxErrorJSON, ...args);
     }
 
     // 记录一条信息日志
@@ -479,8 +505,8 @@ export class MonitorWeb {
     }
 
     // 记录一条错误日志
-    error(...args) {
-        this._log(null, MonitorWeb.levelEnum.error, ...args);
+    error(ajaxErrorJSON, ...args) {
+        this._log(null, MonitorWeb.levelEnum.error, ajaxErrorJSON, ...args);
     }
     /* eslint-enable no-console, no-bitwise*/
 }

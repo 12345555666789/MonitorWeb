@@ -31,11 +31,14 @@
 		})
     }
 	errBtn.onclick = function () {
-		analysisWeb.clickStat('initPage', '进入页面')
+      // ajax错误
+      let xhr = new XMLHttpRequest()
+      xhr.open('GET', 'http://test.com')
+	  xhr.send()
+
+      // 脚本错误
+	  runErr()
     }
-    // errBtn.onclick = function () {
-	//     runErr()
-    // }
     function runErr() {
 	    runErr()
     }
