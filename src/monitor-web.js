@@ -34,8 +34,11 @@ export class MonitorWeb {
             if (typeof param.reportingCycle !== 'number') {
                 config.reportingCycle = 10000
             }
-            if (typeof param.moduleName !== 'string') {
-                throw new Error('MonitorWeb初始化错误 - 构造函数的参数 moduleName 必须是一个字符串！');
+            if (typeof param.appName !== 'string') {
+                throw new Error('MonitorWeb初始化错误 - 构造函数的参数 appName 必须是一个字符串！');
+            }
+            if (typeof param.appid !== 'string') {
+                throw new Error('MonitorWeb初始化错误 - 构造函数的参数 appid 必须是一个字符串！');
             }
             if (typeof param.isLog !== 'boolean') {
                 config.isLog = true
@@ -155,7 +158,8 @@ export class MonitorWeb {
             timeLocalString: Fn._getDateTimeString(new Date()),
             clickEvents: [...this.clickEvents] || null,
             userAgent: navigator.userAgent || null,
-            moduleName: this.config.moduleName,
+            appName: this.config.appName,
+            appid: this.config.appid,
             performance: Fn.formatPerformance(performance),
             id: Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
             uuid: this.uuid
@@ -221,7 +225,8 @@ export class MonitorWeb {
                 timeLocalString: Fn._getDateTimeString(new Date()),
                 clickEvents: [...this.clickEvents] || null,
                 userAgent: navigator.userAgent || null,
-                moduleName: this.config.moduleName,
+                appName: this.config.appName,
+                appid: this.config.appid,
                 performance: Fn.formatPerformance(performance),
                 id: Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
                 uuid: this.uuid
@@ -246,7 +251,8 @@ export class MonitorWeb {
                 time: new Date().getTime(),
                 timeLocalString: Fn._getDateTimeString(new Date()),
                 clickEvents: [...this.clickEvents] || null,
-                moduleName: this.config.moduleName,
+                appName: this.config.appName,
+                appid: this.config.appid,
                 performance: Fn.formatPerformance(performance),
                 id: Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36),
                 uuid: this.uuid
@@ -371,7 +377,8 @@ export class MonitorWeb {
             id: `${Fn.getReqId() + '-' + Number(Math.random().toString().substr(2)).toString(36)}`,
             time: new Date().getTime(),
             timeLocalString: Fn._getDateTimeString(new Date()),
-            moduleName: this.config.moduleName,
+            appName: this.config.appName,
+            appid: this.config.appid,
             level,
             messages: args,
             path: window.location.href,

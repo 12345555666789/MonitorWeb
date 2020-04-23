@@ -1,7 +1,7 @@
 ### web前端日志收集及埋点上报方案
 
 ##### 安装
-###### 版本V2.0.9
+###### 版本V2.1.0
 ```
 npm install monitor-web --save
 ```
@@ -31,8 +31,9 @@ import {MonitorWeb, AnalysisWeb} from 'monitor-web'
 |config::url   | String |  true   | 上报接口url 必传 |
 |config::maxRetryCount | Number | false | 日志上报失败重试次数, 默认值: 5 |
 |config::reportingCycle | Number | false | 日志自动上报/清理周期, 单位/毫秒,默认值:10000|
-|config::moduleName | String  |  true | 页面模块名称, 必传 |
 |config::isLog | Boolean | false | 是否在控制台打印上报情况, 默认值:true |
+|config::appid | String  | true | 应用ID, 必传 |
+|config::appName | String  | true | 页面模块名称, 必传 |
 
 ##### 创建实例
 ```javascript
@@ -40,7 +41,7 @@ import {MonitorWeb, AnalysisWeb} from 'monitor-web'
         url: 'http://127.0.0.1:8888', // 上报url 必传!
         maxRetryCount: 5, // 上报重试次数
         reportingCycle: 10000, // 上报周期, 单位:毫秒
-        moduleName: 'focus', // 页面项目名称 必传!
+        appName: 'focus', // 页面项目名称 必传!
         isLog: true, // 是否在控制台打印日志及上报情况
     });
 ```
@@ -70,8 +71,9 @@ Vue.prototype.$MonitorWeb = new MonitorWeb(
         url: 'http://127.0.0.1:8888', // 上报url 必传!
         maxRetryCount: 5, // 上报重试次数
         reportingCycle: 10000, // 上报周期, 单位:毫秒
-        moduleName: '项目名称', // 项目名称 必传!
+        appName: '项目名称', // 项目名称 必传!
         isLog: true, // 是否在控制台打印日志及上报情况
+        appid: 'appid' // 应用ID，必传
     }
 )
 
@@ -90,8 +92,9 @@ Vue.config.errorHandler = (err, vm, info) => {
 |::url   | String |  true   | 上报接口url|
 |::max_retry_count | Number | true | 日志上报失败重试次数, 默认值: 5 |
 |::reporting_cycle | Number | true | 日志自动上报日志队列周期, 单位/毫秒,默认值:10000|
-|::module_name | String  |  true | 页面模块名称, 必传 |
+|::app_name | String  |  true | 页面模块名称, 必传 |
 |::is_log | boolean | true | 是否在控制台打印上报情况, 默认值:true|
+|::appid | String  | true | 应用ID |
 |data    | Array(LogData)| true | 异常日志 |
 
 ##### 代码逻辑异常日志字段
@@ -205,7 +208,7 @@ Vue.config.errorHandler = (err, vm, info) => {
     let analysis = new AnalysisWeb({ // 埋点相关配置
         	url: 'http://127.0.0.1:8888', // 埋点接口url, 不传则默认使用日志上报url
             appid: '1000101', // 用户下该应用ID, 必传
-            appName: '本地测试应用' // 应用名称, 如不传则默认使用moduleName
+            appName: '本地测试应用' // 应用名称
     });
 
 // 在流程中调用
@@ -232,7 +235,7 @@ Vue.config.errorHandler = (err, vm, info) => {
 | config | Object | true    |配置对象 |
 |config::url | String | true | 埋点上报接口Url |
 |config::appid | String | true | 分析用户下appID |
-|config::appName | String | true | app名称 |
+|config::app_name | String | true | app名称 |
 |data | Array(Object) | true | 埋点数据 |
 | data::point_params    | Any | false | 埋点自定义携带参数 |
 | data::point_name | String | false | 埋点事件名 |

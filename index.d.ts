@@ -19,9 +19,13 @@ export class MonitorWeb {
              */
             reportingCycle?: number,
             /**
-             * 页面模块名称, 如不传则取页面url路径部分第一级
+             * 应用名称
              */
-            moduleName?: string,
+            appName?: string,
+            /**
+             * appid, 必填
+             */
+            appid: string,
             /**
              * 是否在控制台打印上报情况, 默认值:true
              * @default true

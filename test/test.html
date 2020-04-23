@@ -18,16 +18,17 @@
 	document.body.appendChild(monitor)
 	monitor.onload = function () {
 		monitorWeb = new MonitorWeb({
-			url: 'http://10.100.54.225/weblog/logreport', // 上报url 必传!
+			url: 'http://10.53.7.118/weblog/logreport', // 上报url 必传!
 			maxRetryCount: 5, // 上报重试次数
 			reportingCycle: 10000, // 上报周期, 单位:毫秒
-			moduleName: 'portal', // 页面项目名称 必传!
-			isLog: true // 是否在控制台打印日志及上报情况
+			appName: 'portal', // 页面项目名称 必传!
+			isLog: true, // 是否在控制台打印日志及上报情况
+            appid: 'appid' // 应用ID
 		})
 		analysisWeb = new AnalysisWeb({ // 埋点相关配置
-			url: 'http://10.100.54.225/weblog/logreport', // 埋点接口url, 不传则默认使用日志上报url
+			url: 'http://10.53.7.118/weblog/logreport', // 埋点接口url, 不传则默认使用日志上报url
 			appid: '1000101', // 用户下该应用ID, 必传
-			appName: '本地测试应用' // 应用名称, 如不传则默认使用moduleName
+			appName: '本地测试应用' // 应用名称, 必传
 		})
     }
 	errBtn.onclick = function () {
