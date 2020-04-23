@@ -43,6 +43,7 @@ import {MonitorWeb, AnalysisWeb} from 'monitor-web'
         reportingCycle: 10000, // 上报周期, 单位:毫秒
         appName: 'focus', // 页面项目名称 必传!
         isLog: true, // 是否在控制台打印日志及上报情况
+        appid: 'yqnfFhj21'
     });
 ```
 
